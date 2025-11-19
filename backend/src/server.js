@@ -1,8 +1,8 @@
 import express from "express";
 import { ENV } from "./lib/env.js";
-import path from "path";
+// import path from "path";
 import { connectDB } from "./lib/DB.js";
-const _dirname = path.resolve();
+import cors from "cors";
 
 const app = express();
 
@@ -10,7 +10,7 @@ app.use(express.json());
 
 // Allow requests from your frontend URL
 app.use(cors({
-  origin: "https://code-tester-teal.vercel.app/", 
+  origin: ENV.FRONTEND_URL, 
   credentials: true, // if using cookies or auth headers
 }));
 
