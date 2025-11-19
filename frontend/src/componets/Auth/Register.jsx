@@ -1,6 +1,6 @@
 
 import  { useState } from 'react';
-import { Mail, Lock, User, Code } from 'lucide-react';
+import { Mail, Lock, User, Code,Eye,EyeOff } from 'lucide-react';
 import { createUserWithEmailAndPassword, signInWithRedirect } from 'firebase/auth';
 import { auth, provider } from '../../firebase/config';
 import { Link,useNavigate } from "react-router-dom";
@@ -10,17 +10,48 @@ export default function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [show, setShow] = useState(false);
+  const [emailError, setEmailError] = useState('');
+  const[nameError,setNameError]=useState('');
+  const[passwordError,setPasswordError]=useState('');
+  const navigate=useNavigate();
+ 
+  
+
 
   const handleRegister = async () => {
     if (password !== confirmPassword) {
-      alert('Passwords do not match!');
+      
+      setPasswordError("Passwords do not match");
+     
       return;
     }
 
-    console.log('Register:', { name, email, password });
+    if(!name.trim()){
+      setNameError(true);
+      return;
+    }
+    if(!email.trim()){
+      setEmailError("Enter a valid email");
+      return;
+    }
 
+
+     
+
+    try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     console.log("User Info:", userCredential.user);
+    navigate("/login");
+    
+  } catch (error) {
+    if (error.code === "auth/email-already-in-use") {
+      setEmailError("This email is already registered");
+    }
+    if (error.code === "auth/invalid-email") {
+      setEmailError("Enter a valid email");
+    }
+  }
 
    
   };
@@ -57,12 +88,14 @@ export default function Register() {
               <input
                 type="text"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => {setName(e.target.value);setNameError('')}}
                 className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
                 placeholder="Enter your full name"
               />
             </div>
+            {nameError && <p className="text-red-500 text-sm mt-1">Name is required.</p>}
           </div>
+
 
           {/* Email */}
           <div className="mb-4">
@@ -72,11 +105,14 @@ export default function Register() {
               <input
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {setEmail(e.target.value);setEmailError('')}}
+                 
+
                 className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
                 placeholder="Enter your email"
               />
             </div>
+            {emailError ? <div className="text-red-500 text-sm mb-4">{emailError}</div> : null}
           </div>
 
           {/* Password */}
@@ -85,13 +121,17 @@ export default function Register() {
             <div className="relative">
               <Lock className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
               <input
-                type="password"
+                type={show?"text":"password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
                 placeholder="Create a password"
               />
+               <div className="absolute right-3 top-3 cursor-pointer" onClick={()=>setShow(!show)}>
+                {show ? <EyeOff className="w-5 h-5 text-gray-400" /> : <Eye className="w-5 h-5 text-gray-400" />}
+              </div>
             </div>
+            {passwordError && <p className="text-red-500 text-sm mt-1">Password is required.</p>}
           </div>
 
           {/* Confirm Password */}
@@ -100,13 +140,18 @@ export default function Register() {
             <div className="relative">
               <Lock className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
               <input
-                type="password"
+                type={show?"text":"password"}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
                 placeholder="Confirm your password"
               />
+               <div className="absolute right-3 top-3 cursor-pointer" onClick={()=>setShow(!show)}>
+                {show ? <EyeOff className="w-5 h-5 text-gray-400" /> : <Eye className="w-5 h-5 text-gray-400" />}
+              </div>
+
             </div>
+
           </div>
 
           <button
