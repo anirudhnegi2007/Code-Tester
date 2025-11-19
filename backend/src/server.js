@@ -8,6 +8,12 @@ const app = express();
 
 app.use(express.json());
 
+// Allow requests from your frontend URL
+app.use(cors({
+  origin: "https://code-tester-teal.vercel.app/", 
+  credentials: true, // if using cookies or auth headers
+}));
+
 
 
 app.get("/health", (req, res) => {
