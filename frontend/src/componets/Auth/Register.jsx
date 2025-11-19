@@ -3,8 +3,9 @@ import  { useState } from 'react';
 import { Mail, Lock, User, Code } from 'lucide-react';
 import { createUserWithEmailAndPassword, signInWithRedirect } from 'firebase/auth';
 import { auth, provider } from '../../firebase/config';
+import { Link,useNavigate } from "react-router-dom";
 
-export default function Register({ onSwitchToLogin }) {
+export default function Register() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -126,18 +127,14 @@ export default function Register({ onSwitchToLogin }) {
             className="w-full flex items-center justify-center gap-3 bg-white border-2 border-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-50 hover:border-green-500 mb-6"
           >
             {/* Google Icon */}
-            <img src="./public/google.png" className='w-7 h-7' alt="Google" />with Google
+            <img src="./public/google.png" className='w-7 h-7' alt="Google" /> with Google
           </button>
 
           <div className="text-center">
             <p className="text-gray-600">
               Already have an account?{' '}
-              <button
-                onClick={onSwitchToLogin}
-                className="text-green-600 hover:text-green-700 font-semibold"
-              >
-                Login
-              </button>
+             
+              <Link to="/login" className="text-green-600 hover:text-green-700 font-semibold">Login</Link>
             </p>
           </div>
 

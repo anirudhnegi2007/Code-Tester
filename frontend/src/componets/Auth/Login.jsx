@@ -1,5 +1,5 @@
 
-import { signInWithEmailAndPassword, signInWithPopup, signInWithRedirect } from 'firebase/auth';
+import { signInWithEmailAndPassword, signInWithPopup, signInWithRedirect,sendPasswordResetEmail } from 'firebase/auth';
 import React from 'react';
 import { auth,provider } from '../../firebase/config';
 
@@ -7,15 +7,43 @@ import { auth,provider } from '../../firebase/config';
 
 
 import { useState } from 'react';
-import { Mail, Lock, Code } from 'lucide-react';
+import { Mail, Lock, Code ,Eye,EyeOff } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 
 
 
 
-export default function Login({ onSwitchToRegister }) {
+export default function Login() {
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  const[show,setShow]=useState(false);
+  const[emailError,setEmailError]=useState(false);
+
+  const[forgotPassword,setForgotPassword]=useState(false);
+
+function handleForgotPassword(email) {
+
+  if(!email.trim()){
+    setEmailError(true);
+    
+    return;
+  }
+  return sendPasswordResetEmail(auth, email)
+    .then(() => {
+      setForgotPassword(true);
+      setEmailError(false);
+     
+    })
+    .catch((error) => {
+      setEmailError(true);
+      
+     
+    });
+}
+
 
   const handleLogin = async () => {
    try {
@@ -69,23 +97,31 @@ export default function Login({ onSwitchToRegister }) {
             </div>
           </div>
 
+          {emailError?<div  className="text-red-500 text-sm mb-4">Enter valid email</div>:null}
+         
+
             {/* Password */}
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-medium mb-2">Password</label>
             <div className="relative">
               <Lock className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
               <input
-                type="password"
+                type={show?'text':'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
                 placeholder="Enter your password"
               />
+              <div className="absolute right-3 top-3 cursor-pointer" onClick={()=>setShow(!show)}>
+                {show ? <EyeOff className="w-5 h-5 text-gray-400" /> : <Eye className="w-5 h-5 text-gray-400" />}
+              </div>
             </div>
           </div>
 
+          {forgotPassword?<div className="text-green-600 text-sm mb-4">Password reset email sent! Check your inbox.</div>:null}
+
           <div className="text-right mb-6">
-            <button className="text-sm text-green-600 hover:text-green-700 font-medium">
+            <button className="text-sm text-green-600 hover:text-green-700 font-medium" onClick={() => handleForgotPassword(email)}>
               Forgot Password?
             </button>
           </div>
@@ -115,12 +151,7 @@ export default function Login({ onSwitchToRegister }) {
           <div className="text-center">
             <p className="text-gray-600">
               Don’t have an account?{' '}
-              <button
-                onClick={onSwitchToRegister}
-                className="text-green-600 hover:text-green-700 font-semibold"
-              >
-                Create Account
-              </button>
+             <Link to="/register" className="text-green-600 hover:text-green-700 font-semibold">Create Account</Link>
             </p>
           </div>
 
