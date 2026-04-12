@@ -1,9 +1,25 @@
+import axios from 'axios';
 
 import  { useState } from 'react';
 import { Mail, Lock, User, Code,Eye,EyeOff } from 'lucide-react';
-import { createUserWithEmailAndPassword, signInWithRedirect } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithRedirect, getRedirectResult, signInWithPopup } from 'firebase/auth';
 import { auth, provider } from '../../firebase/config';
 import { Link,useNavigate } from "react-router-dom";
+import { useEffect } from 'react';
+
+
+ const  saveToBackend  =async (user) => {
+  try {
+    const token = await user.getIdToken();
+    await axios.post('http://localhost:3000/api/user/save', {}, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+  } catch (err) {
+    console.error("Error saving user to backend:", err);
+  }
+};
 
 export default function Register() {
   const [name, setName] = useState('');
@@ -15,8 +31,6 @@ export default function Register() {
   const[nameError,setNameError]=useState('');
   const[passwordError,setPasswordError]=useState('');
   const navigate=useNavigate();
- 
-  
 
 
   const handleRegister = async () => {
@@ -42,6 +56,7 @@ export default function Register() {
     try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     console.log("User Info:", userCredential.user);
+    await saveToBackend(userCredential.user);
     navigate("/login");
     
   } catch (error) {
@@ -58,8 +73,11 @@ export default function Register() {
 
   const handleGoogleAuth = async () => {
    try {   
-           const result = await signInWithRedirect(auth, provider);
+          //  const result = await signInWithRedirect(auth, provider);  it need to fix the bug of not regesting the user in database after google auth
+          const result = await signInWithPopup(auth, provider); 
            console.log("User Info:", result.user);
+            await saveToBackend(result.user);
+            navigate("/login");
        } catch (error) {
            console.error("Error during login:",error);
        }

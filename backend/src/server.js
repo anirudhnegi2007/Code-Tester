@@ -5,18 +5,29 @@ import {serve} from "inngest/express";
 import { connectDB } from "./lib/DB.js";
 import cors from "cors";
 import { functions, inngest } from "./lib/inngest.js";
+import router from "./routes/user.js";
 
+const allowlist = [ENV.FRONTEND_URL , "http://localhost:5173"];
 const app = express();
 
 app.use(express.json());
 
 // Allow requests from your frontend URL
-app.use(cors({
-  origin: ENV.FRONTEND_URL, 
-  credentials: true, // if using cookies or auth headers
-}));
 
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowlist.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
+);
 
+app.use("/api/user", router);
 app.use("/api/inngest" , serve({client : inngest, functions}));
 
 app.get("/health", (req, res) => {

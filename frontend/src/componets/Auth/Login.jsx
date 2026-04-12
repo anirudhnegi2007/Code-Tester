@@ -1,4 +1,4 @@
-
+import axios from 'axios';
 import { signInWithEmailAndPassword, signInWithPopup, signInWithRedirect,sendPasswordResetEmail } from 'firebase/auth';
 import React from 'react';
 import { auth,provider } from '../../firebase/config';
@@ -10,8 +10,18 @@ import { useState } from 'react';
 import { Mail, Lock, Code ,Eye,EyeOff } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-
-
+ const  saveToBackend  =async (user) => {
+  try {
+    const token = await user.getIdToken();
+    await axios.post('http://localhost:3000/api/user/save', {}, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+  } catch (err) {
+    console.error("Error saving user to backend:", err);
+  }
+};
 
 
 export default function Login() {
@@ -49,6 +59,7 @@ function handleForgotPassword(email) {
    try {
     const result = await signInWithEmailAndPassword(auth, email, password);
     console.log("User Info:", result.user);
+    await saveToBackend(result.user);
 
     
    } catch (error) {
@@ -59,8 +70,10 @@ function handleForgotPassword(email) {
 
   const handleGoogleAuth = async () => {
   try {   
-        const result = await signInWithRedirect(auth, provider);
+        // const result = await signInWithRedirect(auth, provider);  it need to fix the bug of not regesting the user in database after google auth
+        const result = await signInWithPopup(auth, provider);
         console.log("User Info:", result.user);
+         await saveToBackend(result.user);
     } catch (error) {
         console.error("Error during login:",error);
     }
