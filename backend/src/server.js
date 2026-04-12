@@ -5,7 +5,7 @@ import {serve} from "inngest/express";
 import { connectDB } from "./lib/DB.js";
 import cors from "cors";
 import { functions, inngest } from "./lib/inngest.js";
-import router from "./routes/user.js";
+import userRoutes from "./routes/user.js";
 
 const allowlist = [ENV.FRONTEND_URL , "http://localhost:5173"];
 const app = express();
@@ -27,7 +27,7 @@ app.use(
   })
 );
 
-app.use("/api/user", router);
+app.use("/api/user", userRoutes);
 app.use("/api/inngest" , serve({client : inngest, functions}));
 
 app.get("/health", (req, res) => {

@@ -58,7 +58,7 @@ function handleForgotPassword(email) {
   const handleLogin = async () => {
    try {
     const result = await signInWithEmailAndPassword(auth, email, password);
-    console.log("User Info:", result.user);
+  
     await saveToBackend(result.user);
 
     
@@ -72,7 +72,7 @@ function handleForgotPassword(email) {
   try {   
         // const result = await signInWithRedirect(auth, provider);  it need to fix the bug of not regesting the user in database after google auth
         const result = await signInWithPopup(auth, provider);
-        console.log("User Info:", result.user);
+       
          await saveToBackend(result.user);
     } catch (error) {
         console.error("Error during login:",error);

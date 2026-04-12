@@ -55,7 +55,7 @@ export default function Register() {
 
     try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    console.log("User Info:", userCredential.user);
+ 
     await saveToBackend(userCredential.user);
     navigate("/login");
     
@@ -75,7 +75,7 @@ export default function Register() {
    try {   
           //  const result = await signInWithRedirect(auth, provider);  it need to fix the bug of not regesting the user in database after google auth
           const result = await signInWithPopup(auth, provider); 
-           console.log("User Info:", result.user);
+       
             await saveToBackend(result.user);
             navigate("/login");
        } catch (error) {

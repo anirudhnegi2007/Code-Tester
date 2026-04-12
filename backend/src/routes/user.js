@@ -1,11 +1,13 @@
 import express from "express";
 import User from "../models/user.model.js";
 import { verifyFirebaseToken } from "../middleware/auth.js";
+import { upsertUser } from "../lib/stream.js";
 
 const router = express.Router();
 
 // Save user after Firebase login/signup
 router.post("/save", verifyFirebaseToken, async (req, res) => {
+  console.log("🔥 ROUTE HIT: /save");
   const { uid, name, email } = req.user;
 
   try {
@@ -18,6 +20,13 @@ router.post("/save", verifyFirebaseToken, async (req, res) => {
         email: email || "",
       });
     }
+    
+    // ✅ Stream integration (always run)
+    await upsertUser({
+      id: uid,
+      name: name || "",
+      email: email || "",
+    });
 
     res.status(200).json(user);
   } catch (err) {
