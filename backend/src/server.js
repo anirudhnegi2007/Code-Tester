@@ -1,8 +1,10 @@
 import express from "express";
 import { ENV } from "./lib/env.js";
 // import path from "path";
+import {serve} from "inngest/express";
 import { connectDB } from "./lib/DB.js";
 import cors from "cors";
+import { functions, inngest } from "./lib/inngest.js";
 
 const app = express();
 
@@ -15,6 +17,7 @@ app.use(cors({
 }));
 
 
+app.use("/api/inngest" , serve({client : inngest, functions}));
 
 app.get("/health", (req, res) => {
   res.status(200).json({ msg: "API is running " });
