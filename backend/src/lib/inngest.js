@@ -2,22 +2,26 @@ import { Inngest } from "inngest";
 import { connectDB } from "./DB.js";
 import User from "../models/user.model.js";
 
+import { upsertUser , DeleteUser } from "./stream.js";
+
 export const inngest = new Inngest({ id: "Code_Tester" });
 
-//  Create User
+//  CREATE USER DB + STREAM
 const syncUserData = inngest.createFunction(
   {
     id: "sync_user_data",
     triggers: { event: "user.created" },
   },
   async ({ event, step }) => {
+
+    const { uid, name, email, profileImage } = event.data;
+
+    // DB
     await step.run("connect-db", async () => {
       await connectDB();
     });
 
-    const { uid, name, email, profileImage } = event.data;
-
-    await step.run("create-user", async () => {
+    await step.run("create-user-db", async () => {
       return await User.create({
         firebaseUID: uid,
         name: name || "",
@@ -25,27 +29,41 @@ const syncUserData = inngest.createFunction(
         profileImage: profileImage || "",
       });
     });
+
+    // STREAM CHAT
+    await step.run("create-stream-user", async () => {
+      await streamClient.upsertUser({
+        id: uid,
+        name: name || "",
+        image: profileImage || "",
+      });
+    });
   }
 );
 
-// Delete User
-const deleteUserFromDB = inngest.createFunction(
+//  DELETE USER DB + STREAM
+const deleteUser = inngest.createFunction(
   {
-    id: "delete_user_from_db",
+    id: "delete_user",
     triggers: { event: "user.deleted" },
   },
   async ({ event, step }) => {
+
+    const { uid } = event.data;
+
     await step.run("connect-db", async () => {
       await connectDB();
     });
 
-    const { uid } = event.data;
-
-    await step.run("delete-user", async () => {
+    await step.run("delete-db-user", async () => {
       return await User.findOneAndDelete({ firebaseUID: uid });
+    });
+
+    await step.run("delete-stream-user", async () => {
+      await streamClient.deleteUser(uid.ToString());
     });
   }
 );
 
 
-export const functions = [syncUserData, deleteUserFromDB];
+export const functions = [syncUserData, deleteUser];

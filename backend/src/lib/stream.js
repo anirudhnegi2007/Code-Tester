@@ -1,13 +1,14 @@
-import ENV from 'dotenv';
-import {StreaChat} from 'stream-chat';
-const api_key = ENV.STREAM_API_KEY;
+import { ENV } from "./env.js";
+
+import {StreamChat} from 'stream-chat';
+const api_key = ENV.Stream_API_Key;
 const api_secret = ENV.Stream_API_Secret;
 
 if(!api_key || !api_secret){
     throw new Error("Stream API key and secret are required");
 }
 
-export const ChatClient = new StreamChat.getInstance(api_key,api_secret); 
+export const ChatClient =  StreamChat.getInstance(api_key,api_secret); 
 
 export const upsertUser= async(userData)=>{
     try {
@@ -19,7 +20,7 @@ export const upsertUser= async(userData)=>{
     }
 }
 
-export const DeleterUser= async(userId)=>{  
+export const DeleteUser= async(userId)=>{  
     try{
         await ChatClient.deleteUser(userId);
         console.log(`User deleted from Stream Chat : ${userId}`);
