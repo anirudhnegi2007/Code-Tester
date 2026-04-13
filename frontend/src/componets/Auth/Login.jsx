@@ -3,6 +3,7 @@ import { signInWithEmailAndPassword, signInWithPopup, signInWithRedirect,sendPas
 import React from 'react';
 import { auth,provider } from '../../firebase/config';
 
+const API_URL = import.meta.env.VITE_backend_URL;
 
 
 
@@ -13,7 +14,7 @@ import { Link } from 'react-router-dom';
  const  saveToBackend  =async (user) => {
   try {
     const token = await user.getIdToken();
-    await axios.post('http://localhost:3000/api/user/save', {}, {
+    await axios.post(`${API_URL}/api/user/save`, {}, {
       headers: {
         Authorization: `Bearer ${token}`
       }

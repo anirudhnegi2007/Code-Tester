@@ -7,12 +7,13 @@ import { auth, provider } from '../../firebase/config';
 import { Link,useNavigate } from "react-router-dom";
 import { useEffect } from 'react';
 
+const API_URL = import.meta.env.VITE_backend_URL;
 
  const  saveToBackend  =async (user) => {
   try {
     const token = await user.getIdToken();
-    await axios.post('http://localhost:3000/api/user/save', {}, {
-      headers: {
+      await axios.post(`${API_URL}/api/user/save`, {}, {
+        headers: {
         Authorization: `Bearer ${token}`
       }
     });

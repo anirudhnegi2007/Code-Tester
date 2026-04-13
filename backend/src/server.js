@@ -6,6 +6,8 @@ import { connectDB } from "./lib/DB.js";
 import cors from "cors";
 import { functions, inngest } from "./lib/inngest.js";
 import userRoutes from "./routes/user.js";
+import {verifyFirebaseToken} from"./middleware/auth.js"
+import chatRoutes from "./routes/chatRoutes.js"
 
 const allowlist = [ENV.FRONTEND_URL , "http://localhost:5173"];
 const app = express();
@@ -27,8 +29,9 @@ app.use(
   })
 );
 
-app.use("/api/user", userRoutes);
+app.use("/api/user",verifyFirebaseToken, userRoutes);
 app.use("/api/inngest" , serve({client : inngest, functions}));
+app.use("/api/chat",chatRoutes)
 
 app.get("/health", (req, res) => {
   res.status(200).json({ msg: "API is running " });
