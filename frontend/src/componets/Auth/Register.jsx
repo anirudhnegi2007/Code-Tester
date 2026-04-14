@@ -85,7 +85,7 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#080c10] flex items-center justify-center p-6 font-sans text-[#e6edf3]">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
 
         <div className="bg-gradient-to-r from-green-600 to-emerald-600 p-8 text-white text-center">

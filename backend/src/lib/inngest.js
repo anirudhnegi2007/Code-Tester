@@ -38,6 +38,8 @@ const syncUserData = inngest.createFunction(
         image: profileImage || "",
       });
     });
+
+    //   email service  need to add 
   }
 );
 

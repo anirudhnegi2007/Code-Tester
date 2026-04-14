@@ -5,6 +5,7 @@ import Register from './componets/Auth/Register.jsx';
 
 
 import Login from './componets/Auth/Login.jsx';
+import Homepage from './pages/Homepage.jsx';
 
 
 
@@ -15,7 +16,7 @@ import Login from './componets/Auth/Login.jsx';
     <BroweserRoute>
       <Routes>
 
-     
+       <Route path='/' element={<Homepage/>}/>
         <Route path='/login' element={<Login/>}/>
         <Route path='/register' element={<Register/>}/>
        
