@@ -1,43 +1,46 @@
 
-// ─── CTA BANNER ──────────────────────────────────────────────────────────────
-function CTABanner({ onCTA }) {
+// // ─── CTA BANNER ──────────────────────────────────────────────────────────────
+const CTABanner = ({ onCTA }) => {
   return (
-    <section style={{
-      background: "var(--bg2)", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)",
-      textAlign: "center", padding: "5rem 2rem", position: "relative", overflow: "hidden",
-    }}>
-      <div style={{
-        position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)",
-        width: 500, height: 200,
-        background: "radial-gradient(ellipse, rgba(57,211,83,.06) 0%, transparent 70%)",
-        pointerEvents: "none",
-      }} />
-      <div className="reveal" style={{ position: "relative", zIndex: 1 }}>
-        <div style={{ fontFamily: "var(--font-mono)", fontSize: ".75rem", color: "var(--green)", letterSpacing: ".12em", textTransform: "uppercase", marginBottom: ".75rem" }}>
+    <section className="relative py-20 bg-zinc-950 border-y border-zinc-800 overflow-hidden">
+      {/* Subtle Glow Background */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[200px] bg-green-500/10 rounded-full blur-3xl pointer-events-none" />
+
+      <div className="max-w-4xl mx-auto px-6 text-center relative z-10 reveal">
+        {/* Label */}
+        <div className="font-mono text-xs tracking-[0.125em] uppercase text-green-500 mb-4">
           Ready?
         </div>
-        <h2 style={{ fontSize: "clamp(1.8rem,4vw,3rem)", fontWeight: 800, letterSpacing: "-.03em", marginBottom: "1rem" }}>
-          Start Your First Interview<br />in{" "}
-          <span style={{ color: "var(--green)" }}>Under 60 Seconds</span>
+
+        {/* Headline */}
+        <h2 className="text-4xl text-white/80 md:text-5xl font-bold tracking-tighter leading-tight mb-6">
+          Start Your First Interview<br />in{' '}
+          <span className="text-green-500">Under 60 Seconds</span>
         </h2>
-        <p style={{ color: "var(--text2)", fontFamily: "var(--font-mono)", fontSize: ".95rem", marginBottom: "2rem" }}>
+
+        {/* Subtext */}
+        <p className="text-zinc-400 text-[15px] font-light max-w-md mx-auto mb-10">
           No credit card. No setup. Just paste a link and start coding.
         </p>
-        <button onClick={() => { launchConfetti(); onCTA("Account created! Welcome aboard 🎉"); }}
-          style={{
-            background: "var(--green)", color: "#080c10", border: "none",
-            padding: ".9rem 2.5rem", borderRadius: 8,
-            fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: "1rem",
-            cursor: "pointer", transition: "all .25s",
+
+        {/* CTA Button */}
+        <button
+          onClick={() => {
+            // launchConfetti();   // Uncomment if you want to keep confetti
+            onCTA("Account created! Welcome aboard 🎉");
           }}
-          onMouseEnter={e => { e.currentTarget.style.background = "#5bdf6b"; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 0 32px rgba(57,211,83,.3)"; }}
-          onMouseLeave={e => { e.currentTarget.style.background = "var(--green)"; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}>
+          className="bg-green-500 hover:bg-green-400 active:bg-green-600  
+                     text-black font-mono font-semibold text-base 
+                     px-10 py-4 rounded-2xl 
+                     transition-all duration-200 
+                     hover:shadow-2xl hover:shadow-green-500/40 
+                     active:scale-[0.97]"
+        >
           Get Started Now — It's Free
         </button>
       </div>
     </section>
   );
-}
-
+};
 
 export default CTABanner;

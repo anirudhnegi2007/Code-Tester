@@ -12,7 +12,7 @@ import chatRoutes from "./routes/chatRoutes.js"
 const allowlist = [ENV.FRONTEND_URL , "http://localhost:5173"];
 const app = express();
 
-app.use(express.json());
+
 
 // Allow requests from your frontend URL
 
@@ -28,19 +28,12 @@ app.use(
     credentials: true,
   })
 );
+app.use(express.json());
 
 app.use("/api/user",verifyFirebaseToken, userRoutes); // ✅ All user endpoints protected globally
 app.use("/api/inngest" , serve({client : inngest, functions})); // Inngest public
 app.use("/api/chat",chatRoutes); // ✅ Chat routes use per-route auth
 
-/*
-🔒 AUTH SUMMARY:
-- Use verifyFirebaseToken middleware for protected routes
-- All /api/user/*: Global auth (above)
-- /api/chat/token: Per-route auth in chatRoutes.js
-- req.user available in protected handlers: {uid, email, name, ...}
-- Frontend: Send 'Authorization: Bearer <firebase_id_token>'
-*/
 
 app.get("/health", (req, res) => {
   res.status(200).json({ msg: "API is running " });

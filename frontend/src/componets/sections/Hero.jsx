@@ -26,7 +26,7 @@ const Hero = ({ onCTA }) => {
             </div>
 
             {/* Heading */}
-            <h1 className="text-5xl md:text-6xl font-bold leading-[1.05] tracking-tighter text-white">
+            <h1 className="text-5xl md:text-6xl font-bold leading-[1.05] tracking-tighter text-white/90">
               Ace Your Coding Interviews{" "}
               <span className="text-green-500">in Real-Time</span>
             </h1>
@@ -51,7 +51,7 @@ const Hero = ({ onCTA }) => {
 
               <button
                 onClick={() => onCTA("Loading practice problems...")}
-                className="border border-zinc-700 hover:border-zinc-600 hover:bg-zinc-900 text-white font-mono text-base px-8 py-4 rounded-2xl transition-all duration-200 active:scale-[0.97]"
+                className="border border-zinc-700 hover:border-zinc-600 hover:bg-zinc-900 text-white/80 font-mono text-base px-8 py-4 rounded-2xl transition-all duration-200 active:scale-[0.97]"
               >
                 Practice Problems
               </button>

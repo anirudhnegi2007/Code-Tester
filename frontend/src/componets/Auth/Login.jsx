@@ -19,6 +19,7 @@ import { Link } from 'react-router-dom';
         Authorization: `Bearer ${token}`
       }
     });
+
   } catch (err) {
     console.error("Error saving user to backend:", err);
   }
@@ -61,7 +62,6 @@ function handleForgotPassword(email) {
     const result = await signInWithEmailAndPassword(auth, email, password);
   
     await saveToBackend(result.user);
-
     
    } catch (error) {
     console.error("Error during login:", error);

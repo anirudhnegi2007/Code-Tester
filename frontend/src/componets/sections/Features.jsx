@@ -22,7 +22,7 @@ const Features = () => {
           <div className="uppercase tracking-[2px] text-green-500 font-mono text-sm mb-3">
             WHAT'S INCLUDED
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold tracking-tighter leading-tight text-white">
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tighter leading-tight text-white/80">
             Everything You Need to<br />Run a Perfect Interview
           </h2>
           <p className="mt-6 text-zinc-400 text-lg leading-relaxed">
@@ -47,7 +47,7 @@ const Features = () => {
               </div>
 
               {/* Title */}
-              <h3 className="text-xl font-semibold text-white mb-3">
+              <h3 className="text-xl font-semibold text-white/80 mb-3">
                 {feature.title}
               </h3>
 

@@ -1,4 +1,4 @@
-// ─── PRACTICE ────────────────────────────────────────────────────────────────
+// ─── PRACTICE SECTION ─────────────────────────────────────────────────────────
 const PROBLEMS = [
   { diff: "Easy",   name: "Two Sum",                solved: true  },
   { diff: "Medium", name: "Longest Substring",      solved: true  },
@@ -7,66 +7,77 @@ const PROBLEMS = [
   { diff: "Easy",   name: "Valid Parentheses",      solved: true  },
 ];
 
-const diffColors = {
-  Easy:   { bg: "rgba(57,211,83,.12)",    color: "var(--green)"  },
-  Medium: { bg: "rgba(255,166,87,.12)",   color: "var(--orange)" },
-  Hard:   { bg: "rgba(255,123,114,.12)",  color: "var(--red)"    },
-};
-
-function Practice({ onCTA }) {
+const Practice = ({ onCTA }) => {
   return (
-    <section id="practice" style={{ padding: "5rem 2rem" }}>
-      <div className="section-inner reveal" style={{ maxWidth: 1100, margin: "0 auto" }}>
-        <div style={{ fontFamily: "var(--font-mono)", fontSize: ".75rem", color: "var(--green)", letterSpacing: ".12em", textTransform: "uppercase", marginBottom: ".75rem" }}>
-          Solo Practice
+    <section id="practice" className="py-20 bg-[#080c10]">
+      <div className="max-w-6xl mx-auto px-6 reveal">
+        {/* Header */}
+        <div className="mb-12">
+          <div className="font-mono text-xs tracking-[0.125em] uppercase text-green-500 mb-3">
+            Solo Practice
+          </div>
+          <h2 className="text-4xl text-white/80 md:text-5xl font-bold tracking-tighter leading-tight">
+            Sharpen Your Skills<br />Between Interviews
+          </h2>
         </div>
-        <h2 style={{ fontSize: "clamp(1.6rem,3vw,2.4rem)", fontWeight: 800, letterSpacing: "-.025em", marginBottom: "3rem" }}>
-          Sharpen Your Skills<br />Between Interviews
-        </h2>
 
-        <div style={{
-          background: "var(--bg2)", border: "1px solid var(--border)", borderRadius: 16, padding: "3rem",
-          display: "grid", gridTemplateColumns: "1fr 1fr", gap: "3rem", alignItems: "center",
-        }}>
-          <div>
-            <p style={{ color: "var(--text2)", fontSize: ".95rem", lineHeight: 1.75, fontFamily: "var(--font-mono)", marginBottom: "1.75rem" }}>
+        {/* Main Content */}
+        <div className="bg-zinc-950 border border-zinc-800 rounded-3xl p-8 md:p-12 grid md:grid-cols-2 gap-12 items-center">
+          
+          {/* Left - Description */}
+          <div className="space-y-8">
+            <p className="text-zinc-400 text-[15px] leading-relaxed">
               500+ problems from array manipulation to dynamic programming. Timed sessions, hidden test cases, and AI hints when you're stuck. Track your progress with detailed analytics.
             </p>
-            <button onClick={() => onCTA("Loading practice arena...")}
-              style={{
-                background: "var(--green)", color: "#080c10", border: "none",
-                padding: ".75rem 1.75rem", borderRadius: 8,
-                fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: ".9rem",
-                cursor: "pointer", transition: "all .25s",
-                display: "flex", alignItems: "center", gap: ".5rem",
-              }}
-              onMouseEnter={e => { e.currentTarget.style.background = "#5bdf6b"; e.currentTarget.style.transform = "translateY(-2px)"; }}
-              onMouseLeave={e => { e.currentTarget.style.background = "var(--green)"; e.currentTarget.style.transform = "translateY(0)"; }}>
+
+            {/* Primary Button - Pure Tailwind */}
+            <button
+              onClick={() => onCTA("Loading practice arena...")}
+              className="bg-green-500 hover:bg-green-400 active:bg-green-600 text-black font-mono font-semibold text-base px-8 py-4 rounded-2xl flex items-center gap-2 transition-all duration-200 hover:shadow-xl hover:shadow-green-500/30 active:scale-[0.98]"
+            >
               ⚡ Start Practicing
             </button>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: ".6rem" }}>
-            {PROBLEMS.map((p) => (
-              <div key={p.name} className="problem-row"
-                style={{
-                  display: "flex", alignItems: "center", gap: ".75rem",
-                  background: "var(--bg)", border: "1px solid var(--border)",
-                  padding: ".65rem 1rem", borderRadius: 8,
-                  fontFamily: "var(--font-mono)", fontSize: ".8rem",
-                  transition: "border-color .2s", cursor: "pointer",
-                }}>
-                <span style={{
-                  padding: ".2rem .55rem", borderRadius: 4, fontSize: ".7rem", fontWeight: 700,
-                  background: diffColors[p.diff].bg, color: diffColors[p.diff].color,
-                }}>
-                  {p.diff}
+          {/* Right - Problem List */}
+          <div className="space-y-3">
+            {PROBLEMS.map((problem) => (
+              <div
+                key={problem.name}
+                className="group flex items-center gap-4 bg-zinc-900 border border-zinc-800 hover:border-zinc-700 rounded-2xl px-6 py-5 transition-all duration-200 cursor-pointer"
+              >
+                {/* Difficulty Badge */}
+                <span
+                  className={`px-4 py-1.5 text-xs font-mono font-bold rounded-xl whitespace-nowrap border
+                    ${problem.diff === 'Easy' 
+                      ? 'bg-green-500/10 text-green-400 border-green-500/30' 
+                      : ''}
+                    ${problem.diff === 'Medium' 
+                      ? 'bg-orange-500/10 text-orange-400 border-orange-500/30' 
+                      : ''}
+                    ${problem.diff === 'Hard' 
+                      ? 'bg-red-500/10 text-red-400 border-red-500/30' 
+                      : ''}
+                  `}
+                >
+                  {problem.diff}
                 </span>
-                <span style={{ flex: 1 }}>{p.name}</span>
-                {p.solved
-                  ? <span style={{ color: "var(--green)", fontSize: ".75rem" }}>✓ Solved</span>
-                  : <span style={{ color: "var(--text3)", fontSize: ".75rem" }}>Attempt →</span>
-                }
+
+                {/* Problem Name */}
+                <span className="flex-1 text-white font-medium text-[15px]">
+                  {problem.name}
+                </span>
+
+                {/* Status */}
+                {problem.solved ? (
+                  <span className="text-green-500 font-mono text-sm flex items-center gap-1">
+                    ✓ Solved
+                  </span>
+                ) : (
+                  <span className="text-zinc-500 font-mono text-sm">
+                    Attempt →
+                  </span>
+                )}
               </div>
             ))}
           </div>
@@ -74,6 +85,6 @@ function Practice({ onCTA }) {
       </div>
     </section>
   );
-}
+};
 
 export default Practice;

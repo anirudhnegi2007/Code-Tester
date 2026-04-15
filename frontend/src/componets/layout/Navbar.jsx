@@ -26,7 +26,7 @@ function Navbar({ onSignup }) {
         }`}
     >
       {/* Logo */}
-      <div className="flex items-center gap-2 font-mono font-bold text-sm text-white">
+      <div className="flex items-center gap-2 font-mono font-bold text-sm text-white/90">
         <span className="w-2 h-2 bg-green-500 rounded-full" />
         Code_Tester
       </div>

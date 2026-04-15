@@ -13,7 +13,7 @@ const Footer = () => {
           <div className="md:col-span-5">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-4 h-4 bg-green-500 rounded-full" />
-              <span className="font-mono text-2xl font-semibold tracking-tighter text-white">
+              <span className="font-mono text-2xl font-semibold tracking-tighter text-white/90">
                 Code_Tester
               </span>
             </div>
@@ -30,10 +30,10 @@ const Footer = () => {
               Platform
             </div>
             <div className="flex flex-col gap-3.5 text-sm">
-              <a href="#" className="text-zinc-300 hover:text-white transition-colors">Features</a>
-              <a href="#" className="text-zinc-300 hover:text-white transition-colors">Practice</a>
-              <a href="#" className="text-zinc-300 hover:text-white transition-colors">For Teams</a>
-              <a href="#" className="text-zinc-300 hover:text-white transition-colors">Pricing</a>
+              <a href="#features" className="text-zinc-300 hover:text-white transition-colors">Features</a>
+              <a href="#practice" className="text-zinc-300 hover:text-white transition-colors">Practice</a>
+              {/* <a href="#" className="text-zinc-300 hover:text-white transition-colors">For Teams</a>
+              <a href="#" className="text-zinc-300 hover:text-white transition-colors">Pricing</a> */}
             </div>
           </div>
 
@@ -59,7 +59,7 @@ const Footer = () => {
             {/* Social Icons */}
             <div className="flex gap-6 mb-10">
               <a 
-                href="#" 
+                href="https://github.com/anirudhnegi2007" 
                 aria-label="GitHub"
                 className="text-zinc-400 hover:text-green-400 transition-colors"
               >
@@ -73,14 +73,14 @@ const Footer = () => {
                 <FaTwitter size={24} />
               </a>
               <a 
-                href="#" 
-                aria-label="LinkedIn"
+                href="https://www.linkedin.com/in/anirudh-negi-b63b26307/" 
+                aria-abel="LinkedIn"
                 className="text-zinc-400 hover:text-green-400 transition-colors"
               >
                 <FaLinkedin size={24} />
               </a>
               <a 
-                href="#" 
+                href="mailto:anirudhnegi2007@gmail.com?subject=Hello&body=Hi%20Anirudh," 
                 aria-label="Email"
                 className="text-zinc-400 hover:text-green-400 transition-colors"
               >
