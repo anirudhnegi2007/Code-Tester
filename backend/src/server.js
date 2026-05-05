@@ -8,6 +8,7 @@ import { functions, inngest } from "./lib/inngest.js";
 import userRoutes from "./routes/user.js";
 import {verifyFirebaseToken} from"./middleware/auth.js"
 import chatRoutes from "./routes/chatRoutes.js"
+import sessionRoutes from "./routes/sessionRoutes.js";
 
 const allowlist = [ENV.FRONTEND_URL , "http://localhost:5173"];
 const app = express();
@@ -33,6 +34,7 @@ app.use(express.json());
 app.use("/api/user",verifyFirebaseToken, userRoutes); // ✅ All user endpoints protected globally
 app.use("/api/inngest" , serve({client : inngest, functions})); // Inngest public
 app.use("/api/chat",chatRoutes); // ✅ Chat routes use per-route auth
+app.use("/api/session", sessionRoutes); // ✅ Session routes 
 
 
 app.get("/health", (req, res) => {

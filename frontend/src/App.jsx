@@ -1,13 +1,14 @@
 import { useState } from 'react'  
 import { BrowserRouter as BroweserRoute, Routes, Route } from 'react-router-dom';
 
+
 import Register from './componets/Auth/Register.jsx';
 
 
 import Login from './componets/Auth/Login.jsx';
 import Homepage from './pages/Homepage.jsx';
 
-
+import Dashboard from './pages/Dashboard.jsx';
 
 
  const App=()=> {
@@ -15,7 +16,7 @@ import Homepage from './pages/Homepage.jsx';
     
     <BroweserRoute>
       <Routes>
-
+      <Route path='/dashboard' element={<Dashboard/>}/>
        <Route path='/' element={<Homepage/>}/>
         <Route path='/login' element={<Login/>}/>
         <Route path='/register' element={<Register/>}/>
