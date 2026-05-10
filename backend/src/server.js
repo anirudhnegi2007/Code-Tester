@@ -31,10 +31,10 @@ app.use(
 );
 app.use(express.json());
 
-app.use("/api/user",verifyFirebaseToken, userRoutes); // ✅ All user endpoints protected globally
+app.use("/api/user",verifyFirebaseToken, userRoutes); //  All user endpoints protected globally
 app.use("/api/inngest" , serve({client : inngest, functions})); // Inngest public
-app.use("/api/chat",chatRoutes); // ✅ Chat routes use per-route auth
-app.use("/api/session", sessionRoutes); // ✅ Session routes 
+app.use("/api/chat",chatRoutes); //  Chat routes use per-route auth
+app.use("/api/session", sessionRoutes); //  Session routes 
 
 
 app.get("/health", (req, res) => {

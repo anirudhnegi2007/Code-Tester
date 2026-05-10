@@ -1,19 +1,19 @@
 import { ENV } from "./env.js";
 
 import {StreamChat} from 'stream-chat';
-import { StreamClient } from "stream-io/node-sdk";
+import { StreamClient } from "@stream-io/node-sdk";
 const api_key = ENV.Stream_API_Key;
 const api_secret = ENV.Stream_API_Secret;
 
 if(!api_key || !api_secret){
     throw new Error("Stream API key and secret are required");
 }
-export const ChatClient =  StreamChat.getInstance(api_key,api_secret); // chat features
-export const StreamClient = new StreamClient(api_key,api_secret) // for stream video call features
+export const chatClient =  StreamChat.getInstance(api_key,api_secret); // chat features
+export const streamClient = new StreamClient(api_key,api_secret) // for stream video call features
 
 export const upsertUser= async(userData)=>{
     try {
-        const result = await ChatClient.upsertUser(userData);
+        const result = await chatClient.upsertUser(userData);
         // console.log(`User upserted to Stream Chat : ${userData}`);
         console.log("User data received:", JSON.stringify(userData, null, 2));
     } catch (error) {
@@ -24,7 +24,7 @@ export const upsertUser= async(userData)=>{
 
 export const DeleteUser= async(userId)=>{  
     try{
-        await ChatClient.deleteUser(userId);
+        await chatClient.deleteUser(userId);
         console.log(`User deleted from Stream Chat : ${userId}`);
     }catch(error){
         console.error("Error deleting user from Stream Chat : ", error);
