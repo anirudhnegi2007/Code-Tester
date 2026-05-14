@@ -1,4 +1,4 @@
-import Session from "../models/Session.js";
+import Session from "../models/session.js";
 import { streamClient, chatClient } from "../lib/stream.js";
 
 export async function createSession(req, res) {
@@ -87,6 +87,12 @@ export async function getSessionById(req, res) {
      if (!session) {
       return res.status(404).json({ error: "Session not found" });
     }
+    if(session.status !== "active"){
+      return res.status(400).json({ error: "Session is not active" });
+    }
+    if(session.host._id.toString() !== req.user._id.toString() && (!session.participants || session.participants._id.toString() !== req.user._id.toString())){
+      return res.status(403).json({ error: "You are not a participant of this session" });
+    }
 
   }catch(error){
     res.status(500).json({ error: "Failed to fetch session" });
@@ -104,7 +110,7 @@ try {
     return res.status(404).json({ error: "Session not found" });
   }
 
-    if (session.participant) return res.status(400).json({ error: "Session is already full" });
+    if (session.participant) return res.status(409).json({ error: "Session is already full" });
   session.participants = userId;
   await session.save();
 const channel = await chatClient.channel("messaging", session.callId);
@@ -135,14 +141,16 @@ if (session.host.toString() !== userId.toString()) {
 if (session.status === "completed") {
   return res.status(400).json({ error: "Session is already completed" });
 }
-session.status = "completed";
-await session.save();
+
 // delete  chat channel
 const channel = await chatClient.channel("messaging", session.callId);
 await channel.delete({hard:true});
 // delete stream video call
 const call= await streamClient.video.call("default", session.callId);
 await call.delete({hard:true});
+
+session.status = "completed";
+await session.save();
 res.status(200).json({ message: "Session ended successfully" });
 
   }catch(error){
