@@ -74,7 +74,7 @@ const Footer = () => {
               </a>
               <a 
                 href="https://www.linkedin.com/in/anirudh-negi-b63b26307/" 
-                aria-abel="LinkedIn"
+                aria-label="LinkedIn"
                 className="text-zinc-400 hover:text-green-400 transition-colors"
               >
                 <FaLinkedin size={24} />
