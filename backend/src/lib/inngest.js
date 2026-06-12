@@ -32,7 +32,7 @@ const syncUserData = inngest.createFunction(
 
     // STREAM CHAT
     await step.run("create-stream-user", async () => {
-      await streamClient.upsertUser({
+      await upsertUser({
         id: uid,
         name: name || "",
         image: profileImage || "",
@@ -62,7 +62,7 @@ const deleteUser = inngest.createFunction(
     });
 
     await step.run("delete-stream-user", async () => {
-      await streamClient.deleteUser(uid.ToString());
+      await DeleteUser(uid.toString());
     });
   }
 );

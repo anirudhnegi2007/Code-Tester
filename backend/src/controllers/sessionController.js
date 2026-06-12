@@ -7,13 +7,17 @@ export async function createSession(req, res) {
     const { problem, difficulty } = req.body;
     const userId = req.user._id;
 
+    if (!userId) {
+      return res.status(401).json({ error: "User database profile not found." });
+    }
+
     if (!problem || !difficulty) {
       return res
         .status(400)
         .json({ error: "Problem and difficulty are required" });
     }
     // generate unique callId for stream video
-    const callId = `session_${Date.now()}_${Math.random().toString(36).substr(7)}`;
+    const callId = `session_${Date.now()}_${Math.random().toString(36).substring(7)}`;
     // create session in database
     const newSession = await Session.create({
       problem,
@@ -31,7 +35,7 @@ export async function createSession(req, res) {
     });
 
     // chat messaging
-    await chatClient.channel("messaging", callId, {
+    const channel = chatClient.channel("messaging", callId, {
       name: ` ${problem} - ${difficulty} Session`,
       members: [userId.toString()],
     });
@@ -41,7 +45,7 @@ export async function createSession(req, res) {
     res.status(201).json({ session: newSession });
   } catch (error) {
     res.status(500).json({ error: "Failed to create session" });
-    console.error("Error creating session: ", error);
+    console.log("Error creating session: ", error);
   }
 }
 
@@ -56,7 +60,7 @@ export async function getActiveSessions(req, res) {
     res.status(200).json({ sessions });
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch sessions" });
-    console.error("Error fetching sessions: ", error);
+    console.log("Error fetching sessions: ", error);
   }
 }
 
@@ -64,102 +68,118 @@ export async function getRecentSessions(req, res) {
   // to get recent sessions of the user
   try {
     const userId = req.user._id;
+    if (!userId) {
+      return res.status(401).json({ error: "User database profile not found." });
+    }
     // get sessions where user is host or participant
-    await Session.find({
+    const sessions = await Session.find({
       status: "completed",
-      $or: [{ host: userId }, { Participants: userId }],
+      $or: [{ host: userId }, { participants: userId }],
     })
+      .populate("host", "username")
+      .populate("participants", "username")
       .sort({ createdAt: -1 })
       .limit(20);
+
+    res.status(200).json({ sessions });
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch recent sessions" });
-    console.error("Error fetching recent sessions: ", error);
+    console.log("Error fetching recent sessions: ", error);
   }
 }
 
 export async function getSessionById(req, res) {
   // to get a session by its ID
-  try{
+  try {
     const { id } = req.params;
     const session = await Session.findById(id)
-    .populate("host", "username")
-    .populate("participants", "username");
-     if (!session) {
+      .populate("host", "username")
+      .populate("participants", "username");
+    if (!session) {
       return res.status(404).json({ error: "Session not found" });
     }
-    if(session.status !== "active"){
+    if (session.status !== "active") {
       return res.status(400).json({ error: "Session is not active" });
     }
-    if(session.host._id.toString() !== req.user._id.toString() && (!session.participants || session.participants._id.toString() !== req.user._id.toString())){
+    if (session.host._id.toString() !== req.user._id.toString() && (!session.participants || !session.participants.some(p => p._id.toString() === req.user._id.toString()))) {
       return res.status(403).json({ error: "You are not a participant of this session" });
     }
 
-  }catch(error){
+    res.status(200).json({ session });
+  } catch (error) {
     res.status(500).json({ error: "Failed to fetch session" });
-    console.error("Error fetching session: ", error);
+    console.log("Error fetching session: ", error);
   }
 }
 
 export async function joinSession(req, res) {
   // to join a session by its ID
-try {
+  try {
     const { id } = req.params;
-  const userId = req.user._id;
-  const session = await Session.findById(id);
-  if (!session) {
-    return res.status(404).json({ error: "Session not found" });
-  }
+    const userId = req.user._id;
+    const session = await Session.findById(id);
+    if (!session) {
+      return res.status(404).json({ error: "Session not found" });
+    }
 
-    if (session.participant) return res.status(409).json({ error: "Session is already full" });
-  session.participants = userId;
-  await session.save();
-const channel = await chatClient.channel("messaging", session.callId);
-await channel.addMembers([userId.toString()]);
-  res.status(200).json({ session });
+    // check if already joined
+    const alreadyJoined = session.participants.some(p => p.toString() === userId.toString());
+    if (!alreadyJoined) {
+      session.participants.push(userId);
+      await session.save();
+    }
 
-}catch(error){
+    const channel = chatClient.channel("messaging", session.callId);
+    await channel.addMembers([userId.toString()]);
+    res.status(200).json({ session });
+
+  } catch (error) {
     res.status(500).json({ error: "Failed to join session" });
-    console.error("Error joining session: ", error);
+    console.log("Error joining session: ", error);
   }
-  
+
 }
 
 export async function endSession(req, res) {
   // to delete a session by its ID
-  try{
-const { id } = req.params;
-const userId = req.user._id;
-const session = await Session.findById(id);
+  try {
+    const { id } = req.params;
+    const userId = req.user._id;
+    const session = await Session.findById(id);
 
-if (!session) {
-  return res.status(404).json({ error: "Session not found" });
-}
-// only host can end the session
-if (session.host.toString() !== userId.toString()) {
-  return res.status(403).json({ error: "Only host can end the session" });
-}
-if (session.status === "completed") {
-  return res.status(400).json({ error: "Session is already completed" });
-}
+    if (!session) {
+      return res.status(404).json({ error: "Session not found" });
+    }
+    // only host can end the session
+    if (session.host.toString() !== userId.toString()) {
+      return res.status(403).json({ error: "Only host can end the session" });
+    }
+    if (session.status === "completed") {
+      return res.status(400).json({ error: "Session is already completed" });
+    }
 
-// delete  chat channel
-const channel = await chatClient.channel("messaging", session.callId);
-await channel.delete({hard:true});
-// delete stream video call
-const call= await streamClient.video.call("default", session.callId);
-await call.delete({hard:true});
+    // delete  chat channel
+    try {
+      const channel = chatClient.channel("messaging", session.callId);
+      await channel.delete({ hard: true });
+    } catch (chatError) {
+      console.log("Could not delete chat channel:", chatError.message);
+    }
 
-session.status = "completed";
-await session.save();
-res.status(200).json({ message: "Session ended successfully" });
+    // delete stream video call
+    try {
+      const call = streamClient.video.call("default", session.callId);
+      await call.delete({ hard: true });
+    } catch (videoError) {
+      console.log("Could not delete stream video call:", videoError.message);
+    }
 
-  }catch(error){
+    session.status = "completed";
+    await session.save();
+    res.status(200).json({ message: "Session ended successfully" });
+
+  } catch (error) {
     res.status(500).json({ error: "Failed to end session" });
-    console.error("Error ending session: ", error);
+    console.log("Error ending session: ", error);
   }
-
-
-
 }
-
-

@@ -15,21 +15,20 @@ const sessionSchema = new mongoose.Schema({
         ref: 'User',
         required: true, 
         },
-        Participants: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        default: null,
-         },
+        participants: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+        }],
         status: {   
-        type: String,
-        enum: [ 'active', 'completed'],
-        default: 'active',
+            type: String,
+            enum: ['active', 'completed'],
+            default: 'active',
         },
         // stream call id 
-       CallId: {
-        type: String,
-        default: null,
-         },
+        callId: {
+            type: String,
+            default: null,
+        },
 
 }, { timestamps: true });
 

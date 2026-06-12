@@ -12,9 +12,9 @@ export async function getStreamToken(req,res) {
         userImage: req.user.profileImage
     })
 
-   }catch(err){
-    console.log("Error in getStreamController" ,error.message)
-    res.status(500).json({ message : " internal error Stream Token"})
+   } catch (err) {
+    console.log("Error in getStreamController", err.message);
+    res.status(500).json({ message: "Internal error generating Stream Token" });
    }
 
 }
