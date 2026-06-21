@@ -1,17 +1,17 @@
 import axios from 'axios';
-import { signInWithEmailAndPassword, signInWithPopup, signInWithRedirect,sendPasswordResetEmail } from 'firebase/auth';
+import { signInWithEmailAndPassword, signInWithPopup, signInWithRedirect, sendPasswordResetEmail } from 'firebase/auth';
 import React from 'react';
-import { auth,provider } from '../../firebase/config';
+import { auth, provider } from '../../firebase/config';
 
 const API_URL = import.meta.env.VITE_backend_URL;
 
 
 
 import { useState } from 'react';
-import { Mail, Lock, Code ,Eye,EyeOff } from 'lucide-react';
+import { Mail, Lock, Code, Eye, EyeOff } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
- const  saveToBackend  =async (user) => {
+const saveToBackend = async (user) => {
   try {
     const token = await user.getIdToken();
     await axios.post(`${API_URL}/api/user/save`, {}, {
@@ -31,59 +31,59 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const[show,setShow]=useState(false);
-  const[emailError,setEmailError]=useState(false);
+  const [show, setShow] = useState(false);
+  const [emailError, setEmailError] = useState(false);
 
-  const[forgotPassword,setForgotPassword]=useState(false);
+  const [forgotPassword, setForgotPassword] = useState(false);
 
-function handleForgotPassword(email) {
+  function handleForgotPassword(email) {
 
-  if(!email.trim()){
-    setEmailError(true);
-    
-    return;
-  }
-  return sendPasswordResetEmail(auth, email)
-    .then(() => {
-      setForgotPassword(true);
-      setEmailError(false);
-     
-    })
-    .catch((error) => {
+    if (!email.trim()) {
       setEmailError(true);
-      
-     
-    });
-}
+
+      return;
+    }
+    return sendPasswordResetEmail(auth, email)
+      .then(() => {
+        setForgotPassword(true);
+        setEmailError(false);
+
+      })
+      .catch((error) => {
+        setEmailError(true);
+
+
+      });
+  }
 
 
   const handleLogin = async () => {
-   try {
-    const result = await signInWithEmailAndPassword(auth, email, password);
-  
-    await saveToBackend(result.user);
-    
-   } catch (error) {
-    console.error("Error during login:", error);
-    
-   }
+    try {
+      const result = await signInWithEmailAndPassword(auth, email, password);
+
+      await saveToBackend(result.user);
+
+    } catch (error) {
+      console.error("Error during login:", error);
+
+    }
   };
 
   const handleGoogleAuth = async () => {
-  try {   
-        // const result = await signInWithRedirect(auth, provider);  it need to fix the bug of not regesting the user in database after google auth
-        const result = await signInWithPopup(auth, provider);
-       
-         await saveToBackend(result.user);
+    try {
+      // const result = await signInWithRedirect(auth, provider);  it need to fix the bug of not regesting the user in database after google auth
+      const result = await signInWithPopup(auth, provider);
+
+      await saveToBackend(result.user);
     } catch (error) {
-        console.error("Error during login:",error);
+      console.error("Error during login:", error);
     }
 
   };
 
   return (
     <div className="min-h-screen bg-[#080c10] flex items-center justify-center p-6 font-sans text-[#e6edf3]">
-     <div className="bg-[#0d1117] border border-[#30363d] rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
+      <div className="bg-[#0d1117] border border-[#30363d] rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
 
         {/* Dark Header */}
         <div className="bg-[#161b22] border-b border-[#30363d] p-8 text-center">
@@ -95,7 +95,7 @@ function handleForgotPassword(email) {
           </div>
           <p className="text-[#8b949e]">Welcome back! Sign in to continue</p>
         </div>
-        
+
         <div className="p-8">
           <h2 className="text-2xl font-bold text-white mb-6">Login to Your Account</h2>
 
@@ -114,28 +114,28 @@ function handleForgotPassword(email) {
             </div>
           </div>
 
-          {emailError?<div  className="text-red-500 text-sm mb-4">Enter valid email</div>:null}
-         
+          {emailError ? <div className="text-red-500 text-sm mb-4">Enter valid email</div> : null}
 
-            {/* Password */}
+
+          {/* Password */}
           <div className="mb-4">
             <label className="block text-gray-200 text-sm font-medium mb-2">Password</label>
             <div className="relative">
               <Lock className="absolute left-3 top-3 w-5 h-5 text-gray-300" />
               <input
-                type={show?'text':'password'}
+                type={show ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
                 placeholder="Enter your password"
               />
-              <div className="absolute right-3 top-3 cursor-pointer" onClick={()=>setShow(!show)}>
+              <div className="absolute right-3 top-3 cursor-pointer" onClick={() => setShow(!show)}>
                 {show ? <EyeOff className="w-5 h-5 text-gray-400" /> : <Eye className="w-5 h-5 text-gray-400" />}
               </div>
             </div>
           </div>
 
-          {forgotPassword?<div className="text-green-600 text-sm mb-4">Password reset email sent! Check your inbox.</div>:null}
+          {forgotPassword ? <div className="text-green-600 text-sm mb-4">Password reset email sent! Check your inbox.</div> : null}
 
           <div className="text-right mb-6">
             <button className="text-sm text-green-600 hover:text-green-700 font-medium" onClick={() => handleForgotPassword(email)}>
@@ -168,7 +168,7 @@ function handleForgotPassword(email) {
           <div className="text-center">
             <p className="text-gray-600">
               Don’t have an account?{' '}
-             <Link to="/register" className="text-green-600 hover:text-green-700 font-semibold">Create Account</Link>
+              <Link to="/register" className="text-green-600 hover:text-green-700 font-semibold">Create Account</Link>
             </p>
           </div>
 

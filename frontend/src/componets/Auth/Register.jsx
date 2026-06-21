@@ -1,19 +1,19 @@
 import axios from 'axios';
 
-import  { useState } from 'react';
-import { Mail, Lock, User, Code,Eye,EyeOff } from 'lucide-react';
+import { useState } from 'react';
+import { Mail, Lock, User, Code, Eye, EyeOff } from 'lucide-react';
 import { createUserWithEmailAndPassword, signInWithRedirect, getRedirectResult, signInWithPopup } from 'firebase/auth';
 import { auth, provider } from '../../firebase/config';
-import { Link,useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useEffect } from 'react';
 
 const API_URL = import.meta.env.VITE_backend_URL;
 
- const  saveToBackend  =async (user) => {
+const saveToBackend = async (user) => {
   try {
     const token = await user.getIdToken();
-      await axios.post(`${API_URL}/api/user/save`, {}, {
-        headers: {
+    await axios.post(`${API_URL}/api/user/save`, {}, {
+      headers: {
         Authorization: `Bearer ${token}`
       }
     });
@@ -29,59 +29,59 @@ export default function Register() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [show, setShow] = useState(false);
   const [emailError, setEmailError] = useState('');
-  const[nameError,setNameError]=useState('');
-  const[passwordError,setPasswordError]=useState('');
-  const navigate=useNavigate();
+  const [nameError, setNameError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const navigate = useNavigate();
 
 
   const handleRegister = async () => {
     if (password !== confirmPassword) {
-      
+
       setPasswordError("Passwords do not match");
-     
+
       return;
     }
 
-    if(!name.trim()){
+    if (!name.trim()) {
       setNameError(true);
       return;
     }
-    if(!email.trim()){
+    if (!email.trim()) {
       setEmailError("Enter a valid email");
       return;
     }
 
 
-     
+
 
     try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
- 
-    await saveToBackend(userCredential.user);
-    navigate("/login");
-    
-  } catch (error) {
-    if (error.code === "auth/email-already-in-use") {
-      setEmailError("This email is already registered");
-    }
-    if (error.code === "auth/invalid-email") {
-      setEmailError("Enter a valid email");
-    }
-  }
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
 
-   
+      await saveToBackend(userCredential.user);
+      navigate("/login");
+
+    } catch (error) {
+      if (error.code === "auth/email-already-in-use") {
+        setEmailError("This email is already registered");
+      }
+      if (error.code === "auth/invalid-email") {
+        setEmailError("Enter a valid email");
+      }
+    }
+
+
   };
 
   const handleGoogleAuth = async () => {
-   try {   
-          //  const result = await signInWithRedirect(auth, provider);  it need to fix the bug of not regesting the user in database after google auth
-          const result = await signInWithPopup(auth, provider); 
-       
-            await saveToBackend(result.user);
-            navigate("/login");
-       } catch (error) {
-           console.error("Error during login:",error);
-       }
+    try {
+      //  const result = await signInWithRedirect(auth, provider);  it need to fix the bug of not regesting the user in database after google auth
+      const result = await signInWithPopup(auth, provider);
+
+      await saveToBackend(result.user);
+      navigate("/login");
+    } catch (error) {
+      console.error("Error during login:", error);
+    }
   };
 
   return (
@@ -107,7 +107,7 @@ export default function Register() {
               <input
                 type="text"
                 value={name}
-                onChange={(e) => {setName(e.target.value);setNameError('')}}
+                onChange={(e) => { setName(e.target.value); setNameError('') }}
                 className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
                 placeholder="Enter your full name"
               />
@@ -124,8 +124,8 @@ export default function Register() {
               <input
                 type="email"
                 value={email}
-                onChange={(e) => {setEmail(e.target.value);setEmailError('')}}
-                 
+                onChange={(e) => { setEmail(e.target.value); setEmailError('') }}
+
 
                 className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
                 placeholder="Enter your email"
@@ -140,13 +140,13 @@ export default function Register() {
             <div className="relative">
               <Lock className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
               <input
-                type={show?"text":"password"}
+                type={show ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
                 placeholder="Create a password"
               />
-               <div className="absolute right-3 top-3 cursor-pointer" onClick={()=>setShow(!show)}>
+              <div className="absolute right-3 top-3 cursor-pointer" onClick={() => setShow(!show)}>
                 {show ? <EyeOff className="w-5 h-5 text-gray-400" /> : <Eye className="w-5 h-5 text-gray-400" />}
               </div>
             </div>
@@ -159,13 +159,13 @@ export default function Register() {
             <div className="relative">
               <Lock className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
               <input
-                type={show?"text":"password"}
+                type={show ? "text" : "password"}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
                 placeholder="Confirm your password"
               />
-               <div className="absolute right-3 top-3 cursor-pointer" onClick={()=>setShow(!show)}>
+              <div className="absolute right-3 top-3 cursor-pointer" onClick={() => setShow(!show)}>
                 {show ? <EyeOff className="w-5 h-5 text-gray-400" /> : <Eye className="w-5 h-5 text-gray-400" />}
               </div>
 
@@ -197,7 +197,7 @@ export default function Register() {
           <div className="text-center">
             <p className="text-gray-600">
               Already have an account?{' '}
-             
+
               <Link to="/login" className="text-green-600 hover:text-green-700 font-semibold">Login</Link>
             </p>
           </div>
