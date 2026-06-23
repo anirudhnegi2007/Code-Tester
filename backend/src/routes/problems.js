@@ -11,42 +11,13 @@ const fallbackProblems = [];
 
 // Helper to generate realistic problem details dynamically based on problem context
 const generateProblemDetails = (contestId, index, name, rating, tags) => {
-  // Common details for specific popular problems
-  if (name.toLowerCase() === "watermelon") {
-    return {
-      contestId, index, name, rating, tags,
-      description: "One hot summer day Pete and his friend Billy decided to buy a watermelon. They chose the biggest and the ripest one, in their opinion. After that the watermelon was weighed, and the scales showed w kilos. They rushed home, dying of thirst, and decided to divide the berry, however they faced a hard problem.\n\nPete and Billy are great fans of even numbers, that's why they want to divide the watermelon in such a way that each of the two parts weighs even number of kilos, at the same time it is not obligatory that the parts are equal. The boys are extremely tired and want to start their meal as soon as possible, that's why you should help them and find out, if they can divide the watermelon in the way they want. For sure, each of them should get a part of positive weight.",
-      inputFormat: "The first (and the only) input line contains integer number w (1 ≤ w ≤ 100) — the weight of the watermelon bought by the boys.",
-      outputFormat: "Print YES, if the boys can divide the watermelon into two parts, each of them weighing even number of kilos; and NO in the opposite case.",
-      constraints: [
-        "Time limit: 1.0 seconds",
-        "Memory limit: 256 megabytes",
-        "Constraints: 1 ≤ w ≤ 100"
-      ],
-      sampleInput: "8",
-      sampleOutput: "YES"
-    };
-  }
-
-  if (name.toLowerCase() === "way too long words") {
-    return {
-      contestId, index, name, rating, tags,
-      description: "Sometimes some words like 'localization' or 'internationalization' are so long that writing them many times in one text is quite tiresome.\n\nLet's consider a word too long, if its length is strictly more than 10 characters. All too long words should be replaced with a special abbreviation.\n\nThis abbreviation is made like this: we write down the first and the last letter of a word and between them we write the number of letters between the first and the last letters. That number is in decimal system and doesn't contain any leading zeroes.\n\nThus, 'localization' will be spelt as 'l10n', and 'internationalization' will be spelt as 'i18n'.\n\nYou are suggested to customize the process of replacing words with abbreviations.",
-      inputFormat: "The first line contains an integer n (1 ≤ n ≤ 100). Each of the following n lines contains one word. All words consist of lowercase Latin letters and have lengths from 1 to 100 characters.",
-      outputFormat: "Print n lines. The i-th line should contain the result of the abbreviation of the i-th word from the input.",
-      constraints: [
-        "Time limit: 1.0 seconds",
-        "Memory limit: 256 megabytes",
-        "Constraints: 1 ≤ n ≤ 100"
-      ],
-      sampleInput: "4\nword\nlocalization\ninternationalization\npneumonoultramicroscopicsilicovolcanoconiosis",
-      sampleOutput: "word\nl10n\ni18n\np43s"
-    };
-  }
-
   // Default rich dynamic detail generation for other problems
   return {
-    contestId, index, name, rating, tags,
+    contestId,
+    index,
+    name,
+    rating,
+    tags,
     description: `Given a competitive programming problem "${name}" from Codeforces Contest ${contestId}, solve it efficiently.\n\nYour task is to write a program that reads values from standard input, processes the values according to standard algorithmic paradigms (such as ${tags.join(" or ") || "implementation"}), and outputs the results to standard output.`,
     inputFormat: "The first line contains a single integer t — the number of test cases.\nEach testcase consists of a single line containing elements representing the input variables for the problem.",
     outputFormat: "For each testcase, print the corresponding answer on a single line.",
@@ -187,6 +158,54 @@ router.get("/:contestId/:index", async (req, res) => {
   } catch (error) {
     console.error("Error in problem details route:", error);
     res.status(500).json({ success: false, error: "Failed to fetch problem details" });
+  }
+});
+
+// POST /api/problems/execute - Proxy code execution request to Piston API
+router.post("/execute", async (req, res) => {
+  try {
+    const { language, code, stdin } = req.body;
+
+    const PISTON_LANGUAGES = {
+      cpp: "c++",
+      java: "java",
+      python: "python",
+      js: "javascript"
+    };
+
+    const pistonLang = PISTON_LANGUAGES[language] || language;
+    const pistonUrl = process.env.PISTON_URL || "https://emkc.org/api/v2/piston";
+
+    console.log(`Forwarding execution to Piston at ${pistonUrl}/execute for language: ${pistonLang}`);
+
+    const response = await fetch(`${pistonUrl}/execute`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        language: pistonLang,
+        version: "*",
+        files: [
+          {
+            content: code
+          }
+        ],
+        stdin: stdin || ""
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`Piston API error response (Status ${response.status}):`, errorText);
+      return res.status(response.status).send(errorText);
+    }
+
+    const data = await response.json();
+    res.status(200).json(data);
+  } catch (error) {
+    console.error("Error executing code via backend Piston proxy:", error);
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 

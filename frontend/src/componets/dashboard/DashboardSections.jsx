@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import {
   activityChartData,
   leaderboardData,
@@ -16,12 +17,20 @@ import {
 } from "./DashboardCards.jsx";
 
 export default function DashboardSections({ onToast }) {
+  const navigate = useNavigate();
+
   return (
     <main className="bg-zinc-950">
       <StatsSection />
       <LiveSessionsSection onJoin={(problem) => onToast(`Joined ${problem} room!`)} />
       <PastSessionsSection onView={(title) => onToast(`Opening recording: ${title}`)} />
-      <QuickActionsSection onAction={(label) => onToast(`${label} started...`)} />
+      <QuickActionsSection onAction={(label) => {
+        if (label === "Practice Problems") {
+          navigate("/problems");
+        } else {
+          onToast(`${label} started...`);
+        }
+      }} />
       <ActivityChart />
       <LeaderboardPreview />
     </main>

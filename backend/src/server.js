@@ -9,6 +9,7 @@ import userRoutes from "./routes/user.js";
 import {verifyFirebaseToken} from"./middleware/auth.js"
 import chatRoutes from "./routes/chatRoutes.js"
 import sessionRoutes from "./routes/sessionRoutes.js";
+import problemRoutes from "./routes/problems.js";
 import { rateLimit } from "express-rate-limit";
 
 const allowlist = [ENV.FRONTEND_URL , "http://localhost:5173"];
@@ -44,6 +45,8 @@ app.use("/api/user",verifyFirebaseToken, userRoutes); //  All user endpoints pro
 app.use("/api/inngest" , serve({client : inngest, functions})); // Inngest public
 app.use("/api/chat",chatRoutes); //  Chat routes use per-route auth
 app.use("/api/session", sessionRoutes); //  Session routes 
+app.use("/api/problems", problemRoutes); //  Codeforces problem set proxy routes
+
 
 
 app.get("/health", (req, res) => {
