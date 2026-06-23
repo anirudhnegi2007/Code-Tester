@@ -18,13 +18,6 @@ const CODE_TEMPLATES = {
   js: `const fs = require('fs');\n\nfunction solve() {\n    const input = fs.readFileSync('/dev/stdin', 'utf-8').trim();\n    if (!input) return;\n    const lines = input.split(/\\s+/);\n    const w = parseInt(lines[0]);\n    // Write your code here\n}\n\nsolve();`
 };
 
-const PISTON_LANGUAGES = {
-  cpp: "c++",
-  java: "java",
-  python: "python",
-  js: "javascript"
-};
-
 export default function ProblemDetail() {
   const { contestId, index } = useParams();
   const [language, setLanguage] = useState("cpp");
@@ -86,11 +79,11 @@ export default function ProblemDetail() {
     setCode(CODE_TEMPLATES[lang]);
   };
 
-  // Run Code logic using Piston code execution API (proxied via Backend)
+  // Run Code logic using Judge0 code execution API (proxied via Backend)
   const handleRunCode = async () => {
     setConsoleOpen(true);
     setExecutionState("running");
-    setConsoleLogs("Compiling and executing code on Piston sandbox...");
+    setConsoleLogs("Compiling and executing code on Judge0 sandbox...");
 
     try {
       const response = await axiosInstance.post("/api/problems/execute", {
@@ -132,7 +125,7 @@ export default function ProblemDetail() {
     }
   };
 
-  // Submit code logic using Piston code execution API (proxied via Backend)
+  // Submit code logic using Judge0 code execution API (proxied via Backend)
   const handleSubmit = async () => {
     setConsoleOpen(true);
     setExecutionState("submitting");

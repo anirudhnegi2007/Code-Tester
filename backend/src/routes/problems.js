@@ -161,50 +161,61 @@ router.get("/:contestId/:index", async (req, res) => {
   }
 });
 
-// POST /api/problems/execute - Proxy code execution request to Piston API
+// POST /api/problems/execute - Proxy code execution request to Judge0 API
 router.post("/execute", async (req, res) => {
   try {
     const { language, code, stdin } = req.body;
 
-    const PISTON_LANGUAGES = {
-      cpp: "c++",
-      java: "java",
-      python: "python",
-      js: "javascript"
+    const JUDGE0_LANGUAGES = {
+      cpp: 105,      // C++ (GCC 13.2.0)
+      java: 91,      // Java (OpenJDK 17.0.1)
+      python: 92,    // Python (3.11.2)
+      js: 93         // JavaScript (Node.js 18.15.0)
     };
 
-    const pistonLang = PISTON_LANGUAGES[language] || language;
-    const pistonUrl = process.env.PISTON_URL || "https://emkc.org/api/v2/piston";
+    const languageId = JUDGE0_LANGUAGES[language] || 92;
+    const judge0Url = process.env.JUDGE0_URL || "https://ce.judge0.com";
 
-    console.log(`Forwarding execution to Piston at ${pistonUrl}/execute for language: ${pistonLang}`);
+    console.log(`Forwarding execution to Judge0 at ${judge0Url} with language_id: ${languageId}`);
 
-    const response = await fetch(`${pistonUrl}/execute`, {
+    const response = await fetch(`${judge0Url}/submissions?base64_encoded=false&wait=true`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        language: pistonLang,
-        version: "*",
-        files: [
-          {
-            content: code
-          }
-        ],
+        source_code: code,
+        language_id: languageId,
         stdin: stdin || ""
       })
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`Piston API error response (Status ${response.status}):`, errorText);
+      console.error(`Judge0 API error response (Status ${response.status}):`, errorText);
       return res.status(response.status).send(errorText);
     }
 
-    const data = await response.json();
-    res.status(200).json(data);
+    const result = await response.json();
+
+    // Map Judge0 response fields to standard execution structure for frontend compatibility
+    const stdout = result.stdout || "";
+    const stderr = result.compile_output || result.stderr || "";
+    const exitCode = (result.status && result.status.id === 3) ? 0 : (result.status ? result.status.id : 1);
+    const output = result.compile_output || result.stderr || result.stdout || "";
+
+    const mappedData = {
+      run: {
+        stdout: stdout,
+        stderr: stderr,
+        code: exitCode,
+        output: output
+      }
+    };
+
+    res.status(200).json(mappedData);
   } catch (error) {
-    console.error("Error executing code via backend Piston proxy:", error);
+    console.error("Error executing code via backend Judge0 proxy:", error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
