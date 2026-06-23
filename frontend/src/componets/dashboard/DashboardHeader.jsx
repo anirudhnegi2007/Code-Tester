@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 import { launchConfetti } from "../ui/Confetti.jsx";
 
@@ -33,12 +34,12 @@ function DashboardNavbar({ onCreateSession }) {
       </div>
 
       <div className="hidden md:flex items-center gap-8">
-        <a href="#" className="text-green-500 font-mono text-sm">
+        <Link to="/dashboard" className="text-green-500 font-mono text-sm">
           Dashboard
-        </a>
-        <a href="#" className="text-zinc-400 font-mono text-sm transition-colors duration-200 hover:text-white">
+        </Link>
+        <Link to="/problems" className="text-zinc-400 font-mono text-sm transition-colors duration-200 hover:text-white">
           Problems
-        </a>
+        </Link>
         <a href="#" className="text-zinc-400 font-mono text-sm transition-colors duration-200 hover:text-white">
           Sessions
         </a>
