@@ -14,6 +14,7 @@ import Homepage from './pages/Homepage.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import ProblemPage from './pages/ProblemPage.jsx';
 import ProblemDetail from './pages/ProblemDetail.jsx';
+import SessionPage from './pages/SessionPage.jsx';
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,7 @@ const queryClient = new QueryClient();
       <Route path='/dashboard' element={<Dashboard/>}/>
        <Route path='/problems' element={<ProblemPage/>}/>
        <Route path='/problems/:contestId/:index' element={<ProblemDetail/>}/>
+       <Route path='/session/:id' element={<SessionPage/>}/>
        <Route path='/' element={<Homepage/>}/>
         <Route path='/login' element={<Login/>}/>
         <Route path='/register' element={<Register/>}/>
