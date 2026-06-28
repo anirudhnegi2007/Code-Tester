@@ -29,6 +29,7 @@ export async function createSession(req, res) {
     // create stream video call for the session
     await streamClient.video.call("default", callId).getOrCreate({
       data: {
+        created_by_id: userId.toString(),
         sessionId: newSession._id.toString(),
         custom: { problem, difficulty, host: userId.toString() },
       },
@@ -37,6 +38,7 @@ export async function createSession(req, res) {
     // chat messaging
     const channel = chatClient.channel("messaging", callId, {
       name: ` ${problem} - ${difficulty} Session`,
+      created_by_id: userId.toString(),
       members: [userId.toString()],
     });
 
@@ -52,8 +54,15 @@ export async function createSession(req, res) {
 export async function getActiveSessions(req, res) {
   // to get all active sessions
   try {
+    // Automatically transition active sessions older than 2 hours to completed on-the-fly
+    const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
+    await Session.updateMany(
+      { status: "active", createdAt: { $lt: twoHoursAgo } },
+      { $set: { status: "completed" } }
+    );
+
     const sessions = await Session.find({ status: "active" })
-      .populate("host", "username")
+      .populate("host", "name firebaseUID profileImage")
       .sort({ createdAt: -1 })
       .limit(20);
 
@@ -76,8 +85,8 @@ export async function getRecentSessions(req, res) {
       status: "completed",
       $or: [{ host: userId }, { participants: userId }],
     })
-      .populate("host", "username")
-      .populate("participants", "username")
+      .populate("host", "name firebaseUID profileImage")
+      .populate("participants", "name firebaseUID profileImage")
       .sort({ createdAt: -1 })
       .limit(20);
 
@@ -93,8 +102,8 @@ export async function getSessionById(req, res) {
   try {
     const { id } = req.params;
     const session = await Session.findById(id)
-      .populate("host", "username")
-      .populate("participants", "username");
+      .populate("host", "name firebaseUID profileImage")
+      .populate("participants", "name firebaseUID profileImage");
     if (!session) {
       return res.status(404).json({ error: "Session not found" });
     }

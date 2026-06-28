@@ -8,6 +8,7 @@ const api_secret = ENV.Stream_API_Secret;
 if(!api_key || !api_secret){
     throw new Error("Stream API key and secret are required");
 }
+export const streamApiKey = api_key;
 export const chatClient =  StreamChat.getInstance(api_key,api_secret); // chat features
 export const streamClient = new StreamClient(api_key,api_secret) // for stream video call features
 
