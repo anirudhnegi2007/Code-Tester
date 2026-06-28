@@ -27,7 +27,7 @@ const CTABanner = ({ onCTA }) => {
         <button
           onClick={() => {
             // launchConfetti();   // Uncomment if you want to keep confetti
-            onCTA("Account created! Welcome aboard 🎉");
+            onCTA("Account created! Welcome aboard 🎉", "start");
           }}
           className="bg-green-500 hover:bg-green-400 active:bg-green-600  
                      text-black font-mono font-semibold text-base 

@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../componets/hooks/useAuth";
 import { useEndSession, useJoinSession, useSessionById } from "../hooks/useSessions";
-import { PROBLEMS } from "../data/problems";
-import { executeCode } from "../lib/piston";
+import { executeCode } from "../lib/judge";
 import Navbar from "../componets/layout/Navbar";
 import { Loader2Icon, PhoneOffIcon } from "lucide-react";
 import CodeEditorPanel from "../componets/CodeEditorPanel";
@@ -65,15 +64,7 @@ function SessionPage() {
     session, loadingSession, isHost, isParticipant
   );
 
-  // Find the problem from our local data
-  const problemData = session?.problem
-    ? Object.values(PROBLEMS).find((p) => p.title === session.problem)
-    : null;
-
   const getStarterCode = (lang) => {
-    if (problemData?.starterCode?.[lang]) {
-      return problemData.starterCode[lang];
-    }
     const normalized = lang === "js" ? "javascript" : lang;
     return FALLBACK_TEMPLATES[normalized] || "";
   };
@@ -95,7 +86,7 @@ function SessionPage() {
   // Update code when problem or language changes
   useEffect(() => {
     setCode(getStarterCode(selectedLanguage));
-  }, [problemData, selectedLanguage]);
+  }, [selectedLanguage]);
 
   // --- Handlers ---
 
@@ -109,7 +100,7 @@ function SessionPage() {
   const handleRunCode = async () => {
     setIsRunning(true);
     setOutput(null);
-    const sampleInput = problemData?.examples?.[0]?.input || cfProblemData?.sampleInput || "";
+    const sampleInput = cfProblemData?.sampleInput || "";
     const result = await executeCode(selectedLanguage, code, sampleInput);
     setOutput(result);
     setIsRunning(false);
@@ -134,7 +125,7 @@ function SessionPage() {
   // --- Access restricted state ---
   if (session && !isHost && !isParticipant && !joinSessionMutation.isPending) {
     return (
-      <div className="h-screen bg-zinc-950 flex flex-col items-center justify-center text-white font-sans p-6 text-center gap-4">
+      <div className="h-screen bg-zinc-955 flex flex-col items-center justify-center text-white font-sans p-6 text-center gap-4">
         <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mb-2">
           <PhoneOffIcon className="w-8 h-8 text-red-500" />
         </div>
@@ -171,7 +162,7 @@ function SessionPage() {
           >
             <ProblemPanel
               session={session}
-              problemData={problemData}
+              problemData={null}
               problem={cfProblemData}
               isHost={isHost}
               onEndSession={handleEndSession}

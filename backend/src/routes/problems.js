@@ -210,7 +210,9 @@ router.post("/execute", async (req, res) => {
         stderr: stderr,
         code: exitCode,
         output: output
-      }
+      },
+      time: result.time !== null && result.time !== undefined ? `${result.time}s` : undefined,
+      memory: result.memory !== null && result.memory !== undefined ? `${(result.memory / 1024).toFixed(1)} MB` : undefined
     };
 
     res.status(200).json(mappedData);

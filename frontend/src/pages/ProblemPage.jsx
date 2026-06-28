@@ -3,7 +3,6 @@ import { Link, useLocation } from "react-router-dom";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import axiosInstance from "../componets/lib/axios.js";
 import { Search, ExternalLink, ChevronLeft, ChevronRight, RotateCcw, Filter, BookOpen, AlertCircle } from "lucide-react";
-import { fallbackProblems } from "../componets/data/problems.js";
 import useReveal from "../componets/hooks/useReveal.js";
 import Footer from "../componets/layout/Footer.jsx";
 import Toast from "../componets/ui/Toast.jsx";
@@ -53,55 +52,14 @@ export default function ProblemPage() {
     placeholderData: keepPreviousData,
   });
 
-  // Client-side fallback logic when backend fails or returns empty cached problemset
   let problems = [];
   let tags = [];
   let totalProblems = 0;
   let totalPages = 1;
   let error = null;
 
-  if (isError || (!loading && (!data || !data.success || !data.problems || data.problems.length === 0))) {
-    // Perform client-side filter & pagination on the fallbackProblems list
-    let filtered = [...fallbackProblems];
-
-    // Search filter
-    if (searchQuery) {
-      const searchLower = searchQuery.toLowerCase();
-      filtered = filtered.filter(p =>
-        p.name.toLowerCase().includes(searchLower) ||
-        `${p.contestId}${p.index}`.toLowerCase().includes(searchLower)
-      );
-    }
-
-    // Tag filter
-    if (selectedTag) {
-      const tagLower = selectedTag.toLowerCase();
-      filtered = filtered.filter(p =>
-        p.tags && p.tags.some(t => t.toLowerCase() === tagLower)
-      );
-    }
-
-    // Difficulty filter (Easy <= 1200, Medium 1300-1900, Hard >= 2000)
-    if (selectedDifficulty) {
-      const diffStr = selectedDifficulty.toLowerCase();
-      if (diffStr === "easy") {
-        filtered = filtered.filter(p => p.rating !== undefined && p.rating <= 1200);
-      } else if (diffStr === "medium") {
-        filtered = filtered.filter(p => p.rating !== undefined && p.rating >= 1300 && p.rating <= 1900);
-      } else if (diffStr === "hard") {
-        filtered = filtered.filter(p => p.rating !== undefined && p.rating >= 2000);
-      }
-    }
-
-    totalProblems = filtered.length;
-    totalPages = Math.ceil(totalProblems / limit) || 1;
-
-    const startIndex = (page - 1) * limit;
-    const endIndex = page * limit;
-    problems = filtered.slice(startIndex, endIndex);
-
-    // Extract unique tags
-    tags = Array.from(new Set(fallbackProblems.flatMap(p => p.tags || []))).sort();
+  if (isError) {
+    error = queryError?.message || "Failed to load problems from server.";
   } else {
     problems = data?.problems || [];
     tags = data?.tags || [];

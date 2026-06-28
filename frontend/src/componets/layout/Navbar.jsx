@@ -14,7 +14,7 @@ function Navbar({ onSignup }) {
     { label: "Features", href: "#features" },
     { label: "Practice", href: "#practice" },
     { label: "How It Works", href: "#how" },
-    { label: "Dashboard", href: "#stats" },
+    { label: "Dashboard", href: "/dashboard" },
   ];
 
   return (
@@ -26,22 +26,32 @@ function Navbar({ onSignup }) {
         }`}
     >
       {/* Logo */}
-      <div className="flex items-center gap-2 font-mono font-bold text-sm text-white/90">
+      <Link to="/" className="flex items-center gap-2 font-mono font-bold text-sm text-white/90 hover:opacity-80 transition-opacity">
         <span className="w-2 h-2 bg-green-500 rounded-full" />
         Code_Tester
-      </div>
+      </Link>
 
       {/* Desktop Links */}
       <div className="hidden md:flex items-center gap-8">
-        {links.map((l) => (
-          <a
-            key={l.label}
-            href={l.href}
-            className="text-zinc-400 font-mono text-sm transition-colors duration-200 hover:text-white"
-          >
-            {l.label}
-          </a>
-        ))}
+        {links.map((l) => 
+          l.href.startsWith("#") ? (
+            <a
+              key={l.label}
+              href={l.href}
+              className="text-zinc-400 font-mono text-sm transition-colors duration-200 hover:text-white"
+            >
+              {l.label}
+            </a>
+          ) : (
+            <Link
+              key={l.label}
+              to={l.href}
+              className="text-zinc-400 font-mono text-sm transition-colors duration-200 hover:text-white"
+            >
+              {l.label}
+            </Link>
+          )
+        )}
       </div>
 
       {/* Buttons */}
@@ -55,7 +65,7 @@ function Navbar({ onSignup }) {
           </button>
         </Link>
 
-        <Link to="/signup">
+        <Link to="/register">
           <button
             onClick={() => onSignup("Account created! Welcome aboard 🎉")}
             className="px-4 py-1.5 rounded-md bg-green-500 text-black text-sm font-mono font-semibold transition-all duration-200 hover:bg-green-400 hover:-translate-y-[1px]"

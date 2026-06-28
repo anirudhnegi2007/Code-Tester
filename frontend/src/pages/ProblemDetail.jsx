@@ -2,8 +2,8 @@ import { useState, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import axiosInstance from "../componets/lib/axios.js";
+import { executeCode } from "../lib/judge.js";
 import { ChevronLeft, Play, Send, AlertTriangle } from "lucide-react";
-import { fallbackProblems } from "../componets/data/problems.js";
 import { launchConfetti } from "../componets/ui/Confetti.jsx";
 import Toast from "../componets/ui/Toast.jsx";
 import ProblemPanel from "../componets/ProblemPanel.jsx";
@@ -39,19 +39,6 @@ export default function ProblemDetail() {
     }, 3200);
   }
 
-  // Helper to generate realistic problem details dynamically on client side if API fails
-  const generateProblemDetails = (cId, idx, pName, pRating, pTags) => {
-    return {
-      contestId: cId, index: idx, name: pName, rating: pRating, tags: pTags,
-      description: `Given a competitive programming problem "${pName}" from Codeforces Contest ${cId}, solve it efficiently.\n\nYour task is to write a program that reads values from standard input, processes the values according to standard algorithmic paradigms (such as ${pTags.join(" or ") || "implementation"}), and outputs the results to standard output.`,
-      inputFormat: "The first line contains a single integer t — the number of test cases.\nEach testcase consists of a single line containing elements representing the input variables for the problem.",
-      outputFormat: "For each testcase, print the corresponding answer on a single line.",
-      constraints: ["Time limit: 2.0 seconds", "Memory limit: 256 megabytes", `Target Rating: ${pRating || "Unrated"}`, `Categories: ${pTags.join(", ")}`],
-      sampleInput: "3\n5\n1 2 3 4 5\n3\n10 20 30\n1\n100",
-      sampleOutput: "15\n60\n100"
-    };
-  };
-
   // Fetch problem details
   const { data, isLoading, isError, error: queryError } = useQuery({
     queryKey: ["problemDetails", contestId, index],
@@ -62,15 +49,7 @@ export default function ProblemDetail() {
     retry: 1
   });
 
-  // Client-side fallback details resolution
-  let problem = data?.problem;
-  if (!problem && !isLoading) {
-    const parsedContestId = parseInt(contestId);
-    const found = fallbackProblems.find(p => p.contestId === parsedContestId && p.index.toUpperCase() === index.toUpperCase());
-    if (found) {
-      problem = generateProblemDetails(found.contestId, found.index, found.name, found.rating, found.tags);
-    }
-  }
+  const problem = data?.problem;
 
   // Sync template code when language changes
   const handleLanguageChange = (lang) => {
@@ -85,13 +64,7 @@ export default function ProblemDetail() {
     setConsoleLogs("Compiling and executing code on Judge0 sandbox...");
 
     try {
-      const response = await axiosInstance.post("/api/problems/execute", {
-        language,
-        code,
-        stdin: problem?.sampleInput || ""
-      });
-
-      const result = response.data;
+      const result = await executeCode(language, code, problem?.sampleInput || "");
       
       if (result.run) {
         const { stdout, stderr, code: exitCode, output } = result.run;
@@ -125,13 +98,7 @@ export default function ProblemDetail() {
     setConsoleLogs("Submitting solution to tests...");
 
     try {
-      const response = await axiosInstance.post("/api/problems/execute", {
-        language,
-        code,
-        stdin: problem?.sampleInput || ""
-      });
-
-      const result = response.data;
+      const result = await executeCode(language, code, problem?.sampleInput || "");
       
       if (result.run && result.run.code === 0 && !result.run.stderr) {
         setExecutionState("success");

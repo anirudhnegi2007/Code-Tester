@@ -32,7 +32,7 @@ const Practice = ({ onCTA }) => {
 
             {/* Primary Button - Pure Tailwind */}
             <button
-              onClick={() => onCTA("Loading practice arena...")}
+              onClick={() => onCTA("Loading practice arena...", "practice")}
               className="bg-green-500 hover:bg-green-400 active:bg-green-600 text-black font-mono font-semibold text-base px-8 py-4 rounded-2xl flex items-center gap-2 transition-all duration-200 hover:shadow-xl hover:shadow-green-500/30 active:scale-[0.98]"
             >
               ⚡ Start Practicing
@@ -44,6 +44,7 @@ const Practice = ({ onCTA }) => {
             {PROBLEMS.map((problem) => (
               <div
                 key={problem.name}
+                onClick={() => onCTA(`Loading ${problem.name}...`, "practice")}
                 className="group flex items-center gap-4 bg-zinc-900 border border-zinc-800 hover:border-zinc-700 rounded-2xl px-6 py-5 transition-all duration-200 cursor-pointer"
               >
                 {/* Difficulty Badge */}

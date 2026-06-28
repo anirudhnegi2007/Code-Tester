@@ -42,7 +42,7 @@ const Hero = ({ onCTA }) => {
               <button
                 onClick={() => {
                   launchConfetti?.();
-                  onCTA("Starting interview room...");
+                  onCTA("Starting interview room...", "start");
                 }}
                 className="bg-green-500 hover:bg-green-400 text-black font-mono font-semibold text-base px-8 py-4 rounded-2xl flex items-center gap-3 transition-all duration-200 active:scale-[0.97] shadow-lg shadow-green-500/30"
               >
@@ -50,7 +50,7 @@ const Hero = ({ onCTA }) => {
               </button>
 
               <button
-                onClick={() => onCTA("Loading practice problems...")}
+                onClick={() => onCTA("Loading practice problems...", "practice")}
                 className="border border-zinc-700 hover:border-zinc-600 hover:bg-zinc-900 text-white/80 font-mono text-base px-8 py-4 rounded-2xl transition-all duration-200 active:scale-[0.97]"
               >
                 Practice Problems

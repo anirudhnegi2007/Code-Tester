@@ -85,7 +85,7 @@ export default function OutputPanel({
     );
   }
 
-  // Fallback to Piston execution output behavior
+  // Fallback to Judge0 execution output behavior
   if (!output) {
     return (
       <div className="h-full flex flex-col bg-zinc-950 border border-zinc-900 rounded-3xl p-6 select-none">
