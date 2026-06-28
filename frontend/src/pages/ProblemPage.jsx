@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import axiosInstance from "../componets/lib/axios.js";
 import { Search, ExternalLink, ChevronLeft, ChevronRight, RotateCcw, Filter, BookOpen, AlertCircle } from "lucide-react";
@@ -22,6 +22,8 @@ export default function ProblemPage() {
   // Toast notifications
   const [toast, setToast] = useState({ visible: false, message: "" });
   const toastTimer = useRef(null);
+
+  const location = useLocation();
 
   useReveal();
 
@@ -65,7 +67,7 @@ export default function ProblemPage() {
     // Search filter
     if (searchQuery) {
       const searchLower = searchQuery.toLowerCase();
-      filtered = filtered.filter(p => 
+      filtered = filtered.filter(p =>
         p.name.toLowerCase().includes(searchLower) ||
         `${p.contestId}${p.index}`.toLowerCase().includes(searchLower)
       );
@@ -74,7 +76,7 @@ export default function ProblemPage() {
     // Tag filter
     if (selectedTag) {
       const tagLower = selectedTag.toLowerCase();
-      filtered = filtered.filter(p => 
+      filtered = filtered.filter(p =>
         p.tags && p.tags.some(t => t.toLowerCase() === tagLower)
       );
     }
@@ -93,11 +95,11 @@ export default function ProblemPage() {
 
     totalProblems = filtered.length;
     totalPages = Math.ceil(totalProblems / limit) || 1;
-    
+
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
     problems = filtered.slice(startIndex, endIndex);
-    
+
     // Extract unique tags
     tags = Array.from(new Set(fallbackProblems.flatMap(p => p.tags || []))).sort();
   } else {
@@ -142,24 +144,38 @@ export default function ProblemPage() {
 
       {/* Navigation Header */}
       <nav className="fixed top-0 left-0 right-0 z-50 h-[60px] px-8 flex items-center justify-between border-b backdrop-blur-xl bg-[#080c10]/80 border-zinc-900">
-        <div className="flex items-center gap-2 font-mono font-bold text-sm text-white/90">
+        <Link to="/dashboard" className="flex items-center gap-2 font-mono font-bold text-sm text-white/90 hover:opacity-80 transition-opacity">
           <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
           Code_Tester
-        </div>
+        </Link>
 
         <div className="hidden md:flex items-center gap-8">
-          <Link to="/dashboard" className="text-zinc-400 font-mono text-sm transition-colors duration-200 hover:text-white">
+          <Link
+            to="/dashboard"
+            className={`font-mono text-sm transition-colors duration-200 ${location.pathname === "/dashboard" ? "text-green-500 font-semibold" : "text-zinc-400 hover:text-white"
+              }`}
+          >
             Dashboard
           </Link>
-          <Link to="/problems" className="text-green-500 font-mono text-sm">
+          <Link
+            to="/problems"
+            className={`font-mono text-sm transition-colors duration-200 ${location.pathname.startsWith("/problems") ? "text-green-500 font-semibold" : "text-zinc-400 hover:text-white"
+              }`}
+          >
             Problems
           </Link>
-          <a href="#" className="text-zinc-400 font-mono text-sm transition-colors duration-200 hover:text-white">
+          <Link
+            to="/dashboard"
+            className="text-zinc-400 font-mono text-sm transition-colors duration-200 hover:text-white"
+          >
             Sessions
-          </a>
-          <a href="#" className="text-zinc-400 font-mono text-sm transition-colors duration-200 hover:text-white">
+          </Link>
+          <Link
+            to="/problems"
+            className="text-zinc-400 font-mono text-sm transition-colors duration-200 hover:text-white"
+          >
             Practice
-          </a>
+          </Link>
         </div>
 
         <div className="flex items-center gap-3">
@@ -199,7 +215,7 @@ export default function ProblemPage() {
         {/* Filter Section */}
         <div className="reveal bg-zinc-900/50 border border-zinc-900 rounded-3xl p-6 mb-8 backdrop-blur-sm">
           <form onSubmit={handleSearchSubmit} className="flex flex-col lg:flex-row gap-4">
-            
+
             {/* Search Input */}
             <div className="flex-1 relative">
               <Search className="absolute left-4 top-3.5 w-5 h-5 text-zinc-500" />
