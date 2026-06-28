@@ -1,6 +1,6 @@
 import React from "react";
 import Editor from "@monaco-editor/react";
-import { Code2, Play, Settings, RefreshCw } from "lucide-react";
+import { Code2, Play, Settings } from "lucide-react";
 
 export default function CodeEditorPanel({
   selectedLanguage,
@@ -9,6 +9,13 @@ export default function CodeEditorPanel({
   onLanguageChange,
   onCodeChange,
   onRunCode,
+  hideHeaderActions = false,
+  languages = [
+    { value: "cpp", label: "C++ (GCC 20)" },
+    { value: "java", label: "Java (OpenJDK 17)" },
+    { value: "python", label: "Python (3.10)" },
+    { value: "javascript", label: "JavaScript (Node.js 20)" },
+  ],
 }) {
   // Map our app languages to Monaco editor languages
   const getMonacoLanguage = (lang) => {
@@ -32,29 +39,32 @@ export default function CodeEditorPanel({
             onChange={onLanguageChange}
             className="bg-transparent text-zinc-300 hover:text-white font-mono text-sm font-bold border-none focus:outline-none cursor-pointer py-1 pr-6"
           >
-            <option value="cpp" className="bg-zinc-950 text-white">C++ (GCC 20)</option>
-            <option value="java" className="bg-zinc-950 text-white">Java (OpenJDK 17)</option>
-            <option value="python" className="bg-zinc-950 text-white">Python (3.10)</option>
-            <option value="javascript" className="bg-zinc-950 text-white">JavaScript (Node.js 20)</option>
+            {languages.map((lang) => (
+              <option key={lang.value} value={lang.value} className="bg-zinc-950 text-white">
+                {lang.label}
+              </option>
+            ))}
           </select>
         </div>
 
         {/* Actions */}
         <div className="flex items-center gap-4">
-          <button
-            onClick={onRunCode}
-            disabled={isRunning}
-            className="flex items-center gap-2 bg-green-500 hover:bg-green-400 text-black font-mono font-bold text-xs px-4 py-2 rounded-xl transition-all duration-150 active:scale-[0.97] disabled:opacity-50 disabled:pointer-events-none shadow-md shadow-green-500/10"
-          >
-            {isRunning ? (
-              <span className="w-3.5 h-3.5 border-2 border-black border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <Play className="w-3.5 h-3.5 fill-current" />
-            )}
-            Run Code
-          </button>
+          {!hideHeaderActions && (
+            <button
+              onClick={onRunCode}
+              disabled={isRunning}
+              className="flex items-center gap-2 bg-green-500 hover:bg-green-400 text-black font-mono font-bold text-xs px-4 py-2 rounded-xl transition-all duration-150 active:scale-[0.97] disabled:opacity-50 disabled:pointer-events-none shadow-md shadow-green-500/10"
+            >
+              {isRunning ? (
+                <span className="w-3.5 h-3.5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Play className="w-3.5 h-3.5 fill-current" />
+              )}
+              Run Code
+            </button>
+          )}
           
-          <div className="h-4 w-px bg-zinc-800" />
+          {!hideHeaderActions && <div className="h-4 w-px bg-zinc-800" />}
           
           <button className="p-1.5 text-zinc-400 hover:text-white hover:bg-zinc-900 rounded-lg transition-colors" title="Editor Settings">
             <Settings className="w-4 h-4" />
