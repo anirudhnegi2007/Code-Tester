@@ -1,20 +1,34 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { auth } from "../../firebase/config";
+import { signOut } from "firebase/auth";
 import { launchConfetti } from "../ui/Confetti.jsx";
 
 export default function DashboardHeader({ onCreateSession }) {
+  const [user, setUser] = useState(auth.currentUser);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((u) => {
+      setUser(u);
+    });
+    return unsubscribe;
+  }, []);
+
+  const displayName = user?.displayName || user?.email?.split("@")[0] || "User";
+
   return (
     <>
-      <DashboardNavbar onCreateSession={onCreateSession} />
-      <WelcomeSection username="Anirudh" onCreateSession={onCreateSession} />
+      <DashboardNavbar user={user} onCreateSession={onCreateSession} />
+      <WelcomeSection username={displayName} onCreateSession={onCreateSession} />
     </>
   );
 }
 
-function DashboardNavbar({ onCreateSession }) {
+function DashboardNavbar({ user, onCreateSession }) {
   const [scrolled, setScrolled] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 30);
@@ -22,37 +36,71 @@ function DashboardNavbar({ onCreateSession }) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const handleLogout = async (e) => {
+    e.preventDefault();
+    try {
+      await signOut(auth);
+      navigate("/login");
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
+  };
+
+  const userInitials = user?.displayName
+    ? user.displayName.split(" ").map(n => n[0]).slice(0, 2).join("").toUpperCase()
+    : user?.email
+    ? user.email.slice(0, 2).toUpperCase()
+    : "AD";
+
+  const isDashboard = location.pathname === "/dashboard";
+  const isProblems = location.pathname.startsWith("/problems");
+
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 h-[60px] px-8 flex items-center justify-between border-b backdrop-blur-xl transition-all duration-300 ${
         scrolled ? "bg-[#080c10]/95 border-zinc-800" : "bg-[#080c10]/80 border-zinc-900"
       }`}
     >
-      <div className="flex items-center gap-2 font-mono font-bold text-sm text-white/90">
+      <Link to="/dashboard" className="flex items-center gap-2 font-mono font-bold text-sm text-white/90 hover:opacity-80 transition-opacity">
         <span className="w-2 h-2 bg-green-500 rounded-full" />
         Code_Tester
-      </div>
+      </Link>
 
       <div className="hidden md:flex items-center gap-8">
-        <Link to="/dashboard" className="text-green-500 font-mono text-sm">
+        <Link
+          to="/dashboard"
+          className={`font-mono text-sm transition-colors duration-200 ${
+            isDashboard ? "text-green-500 font-semibold" : "text-zinc-400 hover:text-white"
+          }`}
+        >
           Dashboard
         </Link>
-        <Link to="/problems" className="text-zinc-400 font-mono text-sm transition-colors duration-200 hover:text-white">
+        <Link
+          to="/problems"
+          className={`font-mono text-sm transition-colors duration-200 ${
+            isProblems ? "text-green-500 font-semibold" : "text-zinc-400 hover:text-white"
+          }`}
+        >
           Problems
         </Link>
-        <a href="#" className="text-zinc-400 font-mono text-sm transition-colors duration-200 hover:text-white">
+        <Link
+          to="/dashboard"
+          className="text-zinc-400 font-mono text-sm transition-colors duration-200 hover:text-white"
+        >
           Sessions
-        </a>
-        <a href="#" className="text-zinc-400 font-mono text-sm transition-colors duration-200 hover:text-white">
+        </Link>
+        <Link
+          to="/problems"
+          className="text-zinc-400 font-mono text-sm transition-colors duration-200 hover:text-white"
+        >
           Practice
-        </a>
+        </Link>
       </div>
 
       <div className="flex items-center gap-3">
         <button
           onClick={() => {
-            launchConfetti();
-            onCreateSession("New interview room created ✨");
+            onCreateSession();
           }}
           className="hidden sm:flex items-center gap-2 bg-green-500 hover:bg-green-400 text-black font-mono font-semibold text-sm px-4 py-1.5 rounded-md transition-all duration-200 active:scale-[0.97]"
         >
@@ -73,7 +121,7 @@ function DashboardNavbar({ onCreateSession }) {
             onClick={() => setDropdownOpen(!dropdownOpen)}
             className="w-9 h-9 bg-green-500 rounded-md flex items-center justify-center text-black font-mono font-bold text-sm hover:bg-green-400 transition-colors"
           >
-            AD
+            {userInitials}
           </button>
 
           {dropdownOpen && (
@@ -82,7 +130,12 @@ function DashboardNavbar({ onCreateSession }) {
               <a href="#" className="flex items-center gap-3 px-5 py-3 text-zinc-400 hover:bg-zinc-900 hover:text-white">⚙️ Settings</a>
               <a href="#" className="flex items-center gap-3 px-5 py-3 text-zinc-400 hover:bg-zinc-900 hover:text-white">💳 Billing</a>
               <div className="h-px bg-zinc-800 my-1 mx-4" />
-              <a href="#" className="flex items-center gap-3 px-5 py-3 text-red-400 hover:bg-zinc-900">🚪 Logout</a>
+              <button
+                onClick={handleLogout}
+                className="w-full text-left flex items-center gap-3 px-5 py-3 text-red-400 hover:bg-zinc-900"
+              >
+                🚪 Logout
+              </button>
             </div>
           )}
         </div>

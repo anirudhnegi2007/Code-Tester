@@ -16,10 +16,13 @@ import { launchConfetti } from "../componets/ui/Confetti";
 import { HowItWorks, Stats } from "../componets/sections/HowItWorks";
 import Footer from "../componets/layout/Footer.jsx";
 
+import { useNavigate } from "react-router-dom";
+
 // ─── ROOT HOMEPAGE ────────────────────────────────────────────────────────────
 export default function Homepage() {
   const [toast, setToast] = useState({ visible: false, message: "" });
   const toastTimer = useRef(null);
+  const navigate = useNavigate();
 
   useReveal();
 
@@ -29,18 +32,29 @@ export default function Homepage() {
     toastTimer.current = setTimeout(() => setToast(t => ({ ...t, visible: false })), 3200);
   }
 
+  const handleCTA = (msg, actionType) => {
+    showToast(msg);
+    setTimeout(() => {
+      if (actionType === "practice") {
+        navigate("/problems");
+      } else {
+        navigate("/dashboard");
+      }
+    }, 600);
+  };
+
   return (
     <>
       {toast.visible && <Toast message={toast.message} visible={toast.visible} />}
 
       <Navbar onSignup={showToast} />
-      <Hero onCTA={showToast} />
+      <Hero onCTA={handleCTA} />
       <Features />
       <HowItWorks />
       <Stats />
-      <Practice onCTA={showToast} />
+      <Practice onCTA={handleCTA} />
       <Testimonials />
-      <CTABanner onCTA={showToast} />
+      <CTABanner onCTA={handleCTA} />
       <Footer />
     </>
   );
