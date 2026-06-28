@@ -33,6 +33,16 @@ export default function Register() {
   const [passwordError, setPasswordError] = useState('');
   const navigate = useNavigate();
 
+  // Auto redirect if already logged in
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        navigate('/dashboard');
+      }
+    });
+    return unsubscribe;
+  }, [navigate]);
+
 
   const handleRegister = async () => {
     if (password !== confirmPassword) {
@@ -85,125 +95,146 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-[#080c10] flex items-center justify-center p-6 font-sans text-[#e6edf3]">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+    <div className="min-h-screen bg-[#080c10] flex flex-col items-center justify-center p-6 font-sans text-[#e6edf3] relative">
+      
+      {/* Header / Logo */}
+      <div className="flex flex-col items-center mb-8">
+        <Link to="/" className="flex items-center gap-2.5 font-mono font-bold text-xl text-white hover:opacity-80 transition-opacity">
+          <span className="w-3 h-3 bg-green-500 rounded-full" />
+          Code_Tester
+        </Link>
+        <p className="text-[#8b949e] text-xs font-mono uppercase tracking-wider mt-2">Create an account to start practicing</p>
+      </div>
 
-        <div className="bg-gradient-to-r from-green-600 to-emerald-600 p-8 text-white text-center">
-          <div className="flex items-center justify-center mb-2">
-            <Code className="w-10 h-10 mr-2" />
-            <h1 className="text-3xl font-bold">Code Tester</h1>
-          </div>
-          <p className="text-green-100">Create your account and start testing</p>
-        </div>
+      <div className="bg-[#0d1117] border border-[#30363d] rounded-2xl w-full max-w-md p-8 shadow-2xl space-y-6">
+        <h2 className="text-xl font-bold text-white tracking-tight border-b border-[#30363d] pb-4 font-mono">CREATE ACCOUNT</h2>
 
-        <div className="p-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">Create New Account</h2>
-
-          {/* Name */}
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-medium mb-2">Full Name</label>
-            <div className="relative">
-              <User className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+        <div className="space-y-4">
+          
+          {/* Full Name */}
+          <div className="space-y-2">
+            <label className="block text-[#8b949e] text-xs font-mono font-bold uppercase tracking-wider">Full Name</label>
+            <div className="relative group">
+              <User className="absolute left-4 top-3.5 w-4 h-4 text-[#6e7681] group-focus-within:text-green-500 transition-colors" />
               <input
                 type="text"
                 value={name}
                 onChange={(e) => { setName(e.target.value); setNameError('') }}
-                className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                placeholder="Enter your full name"
+                className="w-full bg-[#161b22] border border-[#30363d] focus:border-green-500/80 text-[#e6edf3] placeholder-[#484f58] pl-11 pr-4 py-3 rounded-lg focus:outline-none transition-all duration-200 text-sm font-sans"
+                placeholder="John Doe"
               />
             </div>
-            {nameError && <p className="text-red-500 text-sm mt-1">Name is required.</p>}
+            {nameError && <p className="text-red-400 text-xs font-mono">Full name is required.</p>}
           </div>
 
-
           {/* Email */}
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-medium mb-2">Email Address</label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+          <div className="space-y-2">
+            <label className="block text-[#8b949e] text-xs font-mono font-bold uppercase tracking-wider">Email Address</label>
+            <div className="relative group">
+              <Mail className="absolute left-4 top-3.5 w-4 h-4 text-[#6e7681] group-focus-within:text-green-500 transition-colors" />
               <input
                 type="email"
                 value={email}
                 onChange={(e) => { setEmail(e.target.value); setEmailError('') }}
-
-
-                className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                placeholder="Enter your email"
+                className="w-full bg-[#161b22] border border-[#30363d] focus:border-green-500/80 text-[#e6edf3] placeholder-[#484f58] pl-11 pr-4 py-3 rounded-lg focus:outline-none transition-all duration-200 text-sm font-sans"
+                placeholder="you@example.com"
               />
             </div>
-            {emailError ? <div className="text-red-500 text-sm mb-4">{emailError}</div> : null}
+            {emailError && <p className="text-red-400 text-xs font-mono">{emailError}</p>}
           </div>
 
           {/* Password */}
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-medium mb-2">Password</label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+          <div className="space-y-2">
+            <label className="block text-[#8b949e] text-xs font-mono font-bold uppercase tracking-wider">Password</label>
+            <div className="relative group">
+              <Lock className="absolute left-4 top-3.5 w-4 h-4 text-[#6e7681] group-focus-within:text-green-500 transition-colors" />
               <input
-                type={show ? "text" : "password"}
+                type={show ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                placeholder="Create a password"
+                className="w-full bg-[#161b22] border border-[#30363d] focus:border-green-500/80 text-[#e6edf3] placeholder-[#484f58] pl-11 pr-12 py-3 rounded-lg focus:outline-none transition-all duration-200 text-sm font-sans"
+                placeholder="••••••••"
               />
-              <div className="absolute right-3 top-3 cursor-pointer" onClick={() => setShow(!show)}>
-                {show ? <EyeOff className="w-5 h-5 text-gray-400" /> : <Eye className="w-5 h-5 text-gray-400" />}
-              </div>
+              <button 
+                type="button"
+                className="absolute right-4 top-3.5 text-[#6e7681] hover:text-[#e6edf3] transition-colors" 
+                onClick={() => setShow(!show)}
+              >
+                {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
             </div>
-            {passwordError && <p className="text-red-500 text-sm mt-1">Password is required.</p>}
+            {passwordError && <p className="text-red-400 text-xs font-mono">{passwordError}</p>}
           </div>
 
           {/* Confirm Password */}
-          <div className="mb-6">
-            <label className="block text-gray-700 text-sm font-medium mb-2">Confirm Password</label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+          <div className="space-y-2">
+            <label className="block text-[#8b949e] text-xs font-mono font-bold uppercase tracking-wider">Confirm Password</label>
+            <div className="relative group">
+              <Lock className="absolute left-4 top-3.5 w-4 h-4 text-[#6e7681] group-focus-within:text-green-500 transition-colors" />
               <input
-                type={show ? "text" : "password"}
+                type={show ? 'text' : 'password'}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                placeholder="Confirm your password"
+                className="w-full bg-[#161b22] border border-[#30363d] focus:border-green-500/80 text-[#e6edf3] placeholder-[#484f58] pl-11 pr-12 py-3 rounded-lg focus:outline-none transition-all duration-200 text-sm font-sans"
+                placeholder="••••••••"
               />
-              <div className="absolute right-3 top-3 cursor-pointer" onClick={() => setShow(!show)}>
-                {show ? <EyeOff className="w-5 h-5 text-gray-400" /> : <Eye className="w-5 h-5 text-gray-400" />}
-              </div>
-
             </div>
-
           </div>
 
+          {/* Action button */}
           <button
             onClick={handleRegister}
-            className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 rounded-lg font-semibold hover:from-green-700 hover:to-emerald-700 shadow-md mb-4"
+            className="w-full bg-green-500 hover:bg-green-400 text-black font-bold py-3.5 rounded-lg transition-all duration-200 text-sm font-mono uppercase tracking-wider mt-4"
           >
             Create Account
           </button>
 
-          <div className="flex items-center my-6">
-            <div className="flex-1 border-t border-gray-300"></div>
-            <span className="px-4 text-gray-500 text-sm">OR</span>
-            <div className="flex-1 border-t border-gray-300"></div>
+          {/* Divider */}
+          <div className="flex items-center py-2">
+            <div className="flex-1 h-px bg-[#30363d]"></div>
+            <span className="px-4 text-[#6e7681] text-xs font-mono">OR</span>
+            <div className="flex-1 h-px bg-[#30363d]"></div>
           </div>
 
+          {/* Google SSO */}
           <button
             onClick={handleGoogleAuth}
-            className="w-full flex items-center justify-center gap-3 bg-white border-2 border-gray-300 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-50 hover:border-green-500 mb-6"
+            className="w-full flex items-center justify-center gap-2 bg-[#161b22] border border-[#30363d] hover:border-[#484f58] hover:bg-[#1c2128] text-[#e6edf3] py-3 rounded-lg font-semibold transition-all duration-200 text-sm font-mono"
           >
-            {/* Google Icon */}
-            <img src="./public/google.png" className='w-7 h-7' alt="Google" /> with Google
+            <svg className="w-4 h-4" viewBox="0 0 24 24">
+              <path
+                fill="#EA4335"
+                d="M12 5.04c1.66 0 3.2.57 4.38 1.69l3.27-3.27C17.67 1.47 15 0 12 0 7.35 0 3.39 2.67 1.43 6.56l3.86 3C6.23 6.95 8.9 5.04 12 5.04z"
+              />
+              <path
+                fill="#4285F4"
+                d="M23.49 12.27c0-.81-.07-1.59-.2-2.36H12v4.51h6.43c-.28 1.47-1.11 2.71-2.36 3.56l3.64 2.82c2.13-1.97 3.78-4.87 3.78-8.53z"
+              />
+              <path
+                fill="#FBBC05"
+                d="M5.29 14.59c-.25-.74-.39-1.53-.39-2.35 0-.82.14-1.61.39-2.35L1.43 6.56C.52 8.38 0 10.38 0 12.5s.52 4.12 1.43 5.94l3.86-3.03z"
+              />
+              <path
+                fill="#34A853"
+                d="M12 24c3.24 0 5.97-1.07 7.96-2.92l-3.64-2.82c-1.01.68-2.3 1.08-4.32 1.08-3.1 0-5.77-1.91-6.71-4.52l-3.86 3.03C3.39 21.33 7.35 24 12 24z"
+              />
+            </svg>
+            Continue with Google
           </button>
 
-          <div className="text-center">
-            <p className="text-gray-600">
-              Already have an account?{' '}
-
-              <Link to="/login" className="text-green-600 hover:text-green-700 font-semibold">Login</Link>
-            </p>
-          </div>
+          {/* Footer Navigation */}
+          <p className="text-center text-[#8b949e] text-xs mt-6">
+            Already have an account?{' '}
+            <Link to="/login" className="text-green-500 hover:text-green-400 font-bold transition-colors">Login</Link>
+          </p>
 
         </div>
       </div>
+      
+      {/* Footer copyright */}
+      <p className="text-center text-[#6e7681] text-[10px] font-mono mt-8">
+        Built for engineers, by engineers © Code_Tester
+      </p>
     </div>
   );
 }
