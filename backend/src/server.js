@@ -1,77 +1,104 @@
 import express from "express";
 import { ENV } from "./lib/env.js";
-// import path from "path";
-import {serve} from "inngest/express";
+import { serve } from "inngest/express";
 import { connectDB } from "./lib/DB.js";
 import cors from "cors";
 import { functions, inngest } from "./lib/inngest.js";
 import userRoutes from "./routes/user.js";
-import {verifyFirebaseToken} from"./middleware/auth.js"
-import chatRoutes from "./routes/chatRoutes.js"
+import { verifyFirebaseToken } from "./middleware/auth.js";
+import chatRoutes from "./routes/chatRoutes.js";
 import sessionRoutes from "./routes/sessionRoutes.js";
 import problemRoutes from "./routes/problems.js";
 import { rateLimit } from "express-rate-limit";
 
-const allowlist = [ENV.FRONTEND_URL , "http://localhost:5173"];
+const cleanOrigin = (url) => (url ? url.trim().replace(/\/$/, "") : "");
+
+const staticAllowlist = [
+  cleanOrigin(ENV.FRONTEND_URL),
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "https://code-tester-kappa.vercel.app"
+].map(cleanOrigin).filter(Boolean);
+
 const app = express();
 
-// Configure the rate limiter
+// Trust reverse proxies (Render, Vercel, Cloudflare, Nginx)
+app.set("trust proxy", 1);
+
+const isOriginAllowed = (origin) => {
+  if (!origin) return true; // Allow non-browser / server-to-server / curl requests
+  const cleaned = cleanOrigin(origin);
+  if (staticAllowlist.includes(cleaned)) return true;
+  // Allow all Vercel deployment preview URLs & Render origins
+  if (cleaned.endsWith(".vercel.app") || cleaned.endsWith(".onrender.com")) return true;
+  return false;
+};
+
+// Configure rate limiter
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  limit: 100, // Limit each IP to 100 requests per windowMs
+  limit: 200, // Limit each IP to 200 requests per windowMs
   message: { msg: "Too many requests from this IP, please try again after 15 minutes" },
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
-// Allow requests from your frontend URL
-
+// Configure CORS middleware
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin || allowlist.includes(origin)) {
+      if (isOriginAllowed(origin)) {
         callback(null, true);
       } else {
-        callback(new Error("Not allowed by CORS"));
+        console.warn(`CORS blocked for origin: ${origin}`);
+        callback(null, false);
       }
     },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"]
   })
 );
+
 app.use(express.json());
-app.use(limiter); // Apply the rate limiter globally
+app.use(limiter);
 
-app.use("/api/user",verifyFirebaseToken, userRoutes); //  All user endpoints protected globally
-app.use("/api/inngest" , serve({client : inngest, functions})); // Inngest public
-app.use("/api/chat",chatRoutes); //  Chat routes use per-route auth
-app.use("/api/session", sessionRoutes); //  Session routes 
-app.use("/api/problems", problemRoutes); //  Codeforces problem set proxy routes
-
-
+// Routes
+app.use("/api/user", verifyFirebaseToken, userRoutes);
+app.use("/api/inngest", serve({ client: inngest, functions }));
+app.use("/api/chat", chatRoutes);
+app.use("/api/session", sessionRoutes);
+app.use("/api/problems", problemRoutes);
 
 app.get("/health", (req, res) => {
-  res.status(200).json({ msg: "API is running " });
+  res.status(200).json({ msg: "API is running" });
 });
 
-// for deployment of this app
-// if (ENV.NODE_ENV === "production") {
-//   app.use(express.static(path.join(_dirname, "../frontend/dist")));
-
-//   // app.get("/{*any}", (req, res) => {
-//   //   res.sendFile(path.join(_dirname, "../frontend", "dist", "index.html"));
-//   // });
-// }
+// Global Error Handler to guarantee CORS headers on internal errors
+app.use((err, req, res, next) => {
+  console.error("Unhandled Server Error:", err);
+  const reqOrigin = req.headers.origin;
+  if (reqOrigin && isOriginAllowed(reqOrigin)) {
+    res.header("Access-Control-Allow-Origin", reqOrigin);
+    res.header("Access-Control-Allow-Credentials", "true");
+  }
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || "Internal server error"
+  });
+});
 
 const startServer = async () => {
   try {
     await connectDB();
-    app.listen(ENV.PORT, () => {
-      console.log(`Server is running on port ${ENV.PORT}`);
-     
+    app.listen(ENV.PORT || 3000, () => {
+      console.log(`Server is running on port ${ENV.PORT || 3000}`);
     });
   } catch (error) {
     console.error("Error starting the server", error);
     process.exit(1);
   }
 };
+
 startServer();
+

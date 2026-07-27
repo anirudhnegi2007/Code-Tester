@@ -6,26 +6,52 @@ let cachedProblems = null;
 let lastFetchTime = 0;
 const CACHE_DURATION = 15 * 60 * 1000; // 15 minutes cache
 
-// Fallback list of common problems (moved to frontend data directory)
-const fallbackProblems = [];
+// Robust fallback problem set when Codeforces API is slow, rate-limited, or blocked by Cloudflare
+const fallbackProblems = [
+  { contestId: 4, index: "A", name: "Watermelon", rating: 800, tags: ["brute force", "math"] },
+  { contestId: 71, index: "A", name: "Way Too Long Words", rating: 800, tags: ["strings"] },
+  { contestId: 1, index: "A", name: "Theatre Square", rating: 1000, tags: ["math"] },
+  { contestId: 158, index: "A", name: "Next Round", rating: 800, tags: ["implementation"] },
+  { contestId: 231, index: "A", name: "Team", rating: 800, tags: ["brute force", "greedy"] },
+  { contestId: 282, index: "A", name: "Bit++", rating: 800, tags: ["implementation"] },
+  { contestId: 50, index: "A", name: "Domino piling", rating: 800, tags: ["greedy", "math"] },
+  { contestId: 263, index: "A", name: "Beautiful Matrix", rating: 800, tags: ["implementation"] },
+  { contestId: 112, index: "A", name: "Petya and Strings", rating: 800, tags: ["implementation", "strings"] },
+  { contestId: 339, index: "A", name: "Helpful Maths", rating: 800, tags: ["greedy", "sortings", "strings"] },
+  { contestId: 281, index: "A", name: "Word Capitalization", rating: 800, tags: ["strings"] },
+  { contestId: 266, index: "A", name: "Stones on the Table", rating: 800, tags: ["implementation"] },
+  { contestId: 546, index: "A", name: "Soldier and Bananas", rating: 800, tags: ["brute force", "implementation", "math"] },
+  { contestId: 791, index: "A", name: "Bear and Big Brother", rating: 800, tags: ["implementation"] },
+  { contestId: 977, index: "A", name: "Wrong Subtraction", rating: 800, tags: ["implementation"] },
+  { contestId: 617, index: "A", name: "Elephant", rating: 800, tags: ["math"] },
+  { contestId: 1328, index: "A", name: "Divisibility Problem", rating: 800, tags: ["math"] },
+  { contestId: 734, index: "A", name: "Anton and Danik", rating: 800, tags: ["implementation", "strings"] },
+  { contestId: 41, index: "A", name: "Translation", rating: 800, tags: ["implementation", "strings"] },
+  { contestId: 677, index: "A", name: "Vanya and Fence", rating: 800, tags: ["implementation"] },
+  { contestId: 110, index: "A", name: "Nearly Lucky Number", rating: 800, tags: ["implementation"] },
+  { contestId: 1030, index: "A", name: "In Search of an Easy Problem", rating: 800, tags: ["implementation"] },
+  { contestId: 266, index: "B", name: "Queue at the School", rating: 800, tags: ["constructive algorithms", "implementation"] },
+  { contestId: 486, index: "A", name: "Calculating Function", rating: 800, tags: ["math"] },
+  { contestId: 136, index: "A", name: "Presents", rating: 800, tags: ["implementation"] }
+];
 
 // Helper to generate realistic problem details dynamically based on problem context
 const generateProblemDetails = (contestId, index, name, rating, tags) => {
-  // Default rich dynamic detail generation for other problems
+  const safeTags = Array.isArray(tags) ? tags : ["implementation"];
   return {
     contestId,
     index,
     name,
     rating,
-    tags,
-    description: `Given a competitive programming problem "${name}" from Codeforces Contest ${contestId}, solve it efficiently.\n\nYour task is to write a program that reads values from standard input, processes the values according to standard algorithmic paradigms (such as ${tags.join(" or ") || "implementation"}), and outputs the results to standard output.`,
+    tags: safeTags,
+    description: `Given a competitive programming problem "${name}" from Codeforces Contest ${contestId}, solve it efficiently.\n\nYour task is to write a program that reads values from standard input, processes the values according to standard algorithmic paradigms (such as ${safeTags.join(" or ")}), and outputs the results to standard output.`,
     inputFormat: "The first line contains a single integer t — the number of test cases.\nEach testcase consists of a single line containing elements representing the input variables for the problem.",
     outputFormat: "For each testcase, print the corresponding answer on a single line.",
     constraints: [
       "Time limit: 2.0 seconds",
       "Memory limit: 256 megabytes",
       `Target Rating: ${rating || "Unrated"}`,
-      `Categories: ${tags.join(", ")}`
+      `Categories: ${safeTags.join(", ")}`
     ],
     sampleInput: "3\n5\n1 2 3 4 5\n3\n10 20 30\n1\n100",
     sampleOutput: "15\n60\n100"
@@ -41,15 +67,22 @@ router.get("/", async (req, res) => {
     if (!cachedProblems || now - lastFetchTime > CACHE_DURATION) {
       try {
         console.log("Fetching problems from Codeforces API...");
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8-second timeout
+
         const response = await fetch("https://codeforces.com/api/problemset.problems", {
           headers: {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             "Accept": "application/json"
-          }
+          },
+          signal: controller.signal
         });
-        if (response.ok) {
+        clearTimeout(timeoutId);
+
+        const contentType = response.headers.get("content-type");
+        if (response.ok && contentType && contentType.includes("application/json")) {
           const data = await response.json();
-          if (data.status === "OK" && data.result && data.result.problems) {
+          if (data.status === "OK" && data.result && Array.isArray(data.result.problems)) {
             cachedProblems = data.result.problems;
             lastFetchTime = now;
             console.log(`Successfully cached ${cachedProblems.length} Codeforces problems.`);
@@ -57,14 +90,14 @@ router.get("/", async (req, res) => {
             console.warn("Codeforces API returned non-OK status:", data.status, data.comment);
           }
         } else {
-          console.warn(`Codeforces API responded with HTTP status ${response.status}`);
+          console.warn(`Codeforces API responded with HTTP status ${response.status} or non-JSON content`);
         }
       } catch (fetchError) {
-        console.error("Error calling Codeforces API:", fetchError.message);
+        console.error("Error calling Codeforces API (using fallback problems):", fetchError.message);
       }
     }
 
-    const problemsList = cachedProblems || fallbackProblems;
+    const problemsList = (cachedProblems && cachedProblems.length > 0) ? cachedProblems : fallbackProblems;
     let filtered = [...problemsList];
 
     const { search, tag, difficulty, page = 1, limit = 50 } = req.query;
@@ -73,8 +106,8 @@ router.get("/", async (req, res) => {
     if (search) {
       const searchLower = search.toString().toLowerCase();
       filtered = filtered.filter(p =>
-        p.name.toLowerCase().includes(searchLower) ||
-        `${p.contestId}${p.index}`.toLowerCase().includes(searchLower)
+        (p && p.name && p.name.toLowerCase().includes(searchLower)) ||
+        (p && `${p.contestId || ""}${p.index || ""}`.toLowerCase().includes(searchLower))
       );
     }
 
@@ -82,7 +115,7 @@ router.get("/", async (req, res) => {
     if (tag) {
       const tagLower = tag.toString().toLowerCase();
       filtered = filtered.filter(p =>
-        p.tags && p.tags.some(t => t.toLowerCase() === tagLower)
+        p && Array.isArray(p.tags) && p.tags.some(t => t && t.toLowerCase() === tagLower)
       );
     }
 
@@ -90,23 +123,25 @@ router.get("/", async (req, res) => {
     if (difficulty) {
       const diffStr = difficulty.toString().toLowerCase();
       if (diffStr === "easy") {
-        filtered = filtered.filter(p => p.rating !== undefined && p.rating <= 1200);
+        filtered = filtered.filter(p => p && p.rating !== undefined && p.rating <= 1200);
       } else if (diffStr === "medium") {
-        filtered = filtered.filter(p => p.rating !== undefined && p.rating >= 1300 && p.rating <= 1900);
+        filtered = filtered.filter(p => p && p.rating !== undefined && p.rating >= 1300 && p.rating <= 1900);
       } else if (diffStr === "hard") {
-        filtered = filtered.filter(p => p.rating !== undefined && p.rating >= 2000);
+        filtered = filtered.filter(p => p && p.rating !== undefined && p.rating >= 2000);
       }
     }
 
     // Paginate
-    const pageNum = parseInt(page);
-    const limitNum = parseInt(limit);
+    const pageNum = Math.max(1, parseInt(page) || 1);
+    const limitNum = Math.max(1, parseInt(limit) || 50);
     const startIndex = (pageNum - 1) * limitNum;
     const endIndex = pageNum * limitNum;
     const paginated = filtered.slice(startIndex, endIndex);
 
     // Get unique tags sorted alphabetically
-    const allTags = Array.from(new Set(problemsList.flatMap(p => p.tags || []))).sort();
+    const allTags = Array.from(
+      new Set(problemsList.flatMap(p => (p && Array.isArray(p.tags) ? p.tags : [])))
+    ).filter(Boolean).sort();
 
     res.status(200).json({
       success: true,
@@ -129,8 +164,8 @@ router.get("/:contestId/:index", async (req, res) => {
     const parsedContestId = parseInt(contestId);
 
     // Find the problem in the cache, fallback list, or search from active cached list
-    const problemsList = cachedProblems || fallbackProblems;
-    let found = problemsList.find(p => p.contestId === parsedContestId && p.index.toUpperCase() === index.toUpperCase());
+    const problemsList = (cachedProblems && cachedProblems.length > 0) ? cachedProblems : fallbackProblems;
+    let found = problemsList.find(p => p && p.contestId === parsedContestId && p.index && p.index.toUpperCase() === index.toUpperCase());
 
     // If not found in the static/cached list, create a default problem detail object
     if (!found) {
@@ -223,3 +258,4 @@ router.post("/execute", async (req, res) => {
 });
 
 export default router;
+
