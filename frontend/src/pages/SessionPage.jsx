@@ -122,23 +122,43 @@ function SessionPage() {
     );
   }
 
-  // --- Access restricted state ---
-  if (session && !isHost && !isParticipant && !joinSessionMutation.isPending) {
+  // --- Joining / Access state ---
+  if (session && !isHost && !isParticipant) {
     return (
       <div className="h-screen bg-zinc-955 flex flex-col items-center justify-center text-white font-sans p-6 text-center gap-4">
-        <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mb-2">
-          <PhoneOffIcon className="w-8 h-8 text-red-500" />
-        </div>
-        <h2 className="text-2xl font-bold font-mono">Access Restricted</h2>
-        <p className="text-zinc-555 max-w-sm text-sm">
-          Please wait while we register you into this coding interview room.
-        </p>
-        <button
-          onClick={() => navigate("/dashboard")}
-          className="bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-zinc-300 font-mono text-sm px-6 py-2.5 rounded-xl transition-all"
-        >
-          Return to Dashboard
-        </button>
+        {joinSessionMutation.isError ? (
+          <>
+            <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mb-2">
+              <PhoneOffIcon className="w-8 h-8 text-red-500" />
+            </div>
+            <h2 className="text-2xl font-bold font-mono">Failed to Join Room</h2>
+            <p className="text-zinc-400 max-w-sm text-sm">
+              {joinSessionMutation.error?.response?.data?.error || joinSessionMutation.error?.message || "Could not register into this session."}
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => joinSessionMutation.mutate(id, { onSuccess: refetch })}
+                className="bg-green-500 text-black font-mono text-sm px-6 py-2.5 rounded-xl font-bold hover:bg-green-400 transition-all"
+              >
+                Retry Joining
+              </button>
+              <button
+                onClick={() => navigate("/dashboard")}
+                className="bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-zinc-300 font-mono text-sm px-6 py-2.5 rounded-xl transition-all"
+              >
+                Return to Dashboard
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <Loader2Icon className="w-10 h-10 animate-spin text-green-500" />
+            <h2 className="text-xl font-bold font-mono">Joining Interview Room...</h2>
+            <p className="text-zinc-400 max-w-sm text-sm">
+              Registering your account into this coding interview room...
+            </p>
+          </>
+        )}
       </div>
     );
   }

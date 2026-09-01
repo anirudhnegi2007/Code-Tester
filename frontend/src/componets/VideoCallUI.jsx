@@ -277,7 +277,6 @@ export default function VideoCallUI({ chatClient, channel }) {
                 type="submit"
                 disabled={!newMessageText.trim()}
                 className="bg-green-500 hover:bg-green-400 text-black p-2.5 rounded-xl transition-all active:scale-[0.97] disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
-                onClick={handleSendMessage}
               >
                 <Send className="w-3.5 h-3.5 fill-current" />
               </button>

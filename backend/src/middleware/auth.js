@@ -1,5 +1,6 @@
 import admin from "../firebase/firebaseAdmin.js";
 import User from "../models/user.model.js";
+import { upsertUser } from "../lib/stream.js";
 
 export const verifyFirebaseToken = async (req, res, next) => {
   try {
@@ -12,14 +13,29 @@ export const verifyFirebaseToken = async (req, res, next) => {
     
     req.user = decodedToken; // { uid, email, name, etc. }
 
-    const dbUser = await User.findOne({ firebaseUID: decodedToken.uid });
-    if (dbUser) {
-      req.user._id = dbUser._id;
+    let dbUser = await User.findOne({ firebaseUID: decodedToken.uid });
+    if (!dbUser) {
+      dbUser = await User.create({
+        firebaseUID: decodedToken.uid,
+        name: decodedToken.name || decodedToken.email?.split("@")[0] || "User",
+        email: decodedToken.email || "",
+      });
+      try {
+        await upsertUser({
+          id: decodedToken.uid,
+          name: dbUser.name,
+          email: dbUser.email,
+        });
+      } catch (streamErr) {
+        console.error("Stream upsert warning in auth middleware:", streamErr.message);
+      }
     }
+    req.user._id = dbUser._id;
+    req.user.name = dbUser.name || decodedToken.name;
 
     next();
   } catch (err) {
-    console.log(err);
+    console.log("Auth verification error:", err);
     return res.status(401).json({ message: "Invalid token" });
   }
 };

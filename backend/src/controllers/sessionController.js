@@ -107,11 +107,14 @@ export async function getSessionById(req, res) {
     if (!session) {
       return res.status(404).json({ error: "Session not found" });
     }
+    
+    // If the session is completed, restrict access to host or participants
     if (session.status !== "active") {
-      return res.status(400).json({ error: "Session is not active" });
-    }
-    if (session.host._id.toString() !== req.user._id.toString() && (!session.participants || !session.participants.some(p => p._id.toString() === req.user._id.toString()))) {
-      return res.status(403).json({ error: "You are not a participant of this session" });
+      const isHost = session.host?._id?.toString() === req.user._id.toString();
+      const isParticipant = session.participants && session.participants.some(p => p._id.toString() === req.user._id.toString());
+      if (!isHost && !isParticipant) {
+        return res.status(403).json({ error: "Session is no longer active" });
+      }
     }
 
     res.status(200).json({ session });

@@ -1,18 +1,14 @@
-import axios from 'axios';
-
-import { useState } from 'react';
+import axiosInstance from '../lib/axios';
+import { useState, useEffect } from 'react';
 import { Mail, Lock, User, Code, Eye, EyeOff } from 'lucide-react';
 import { createUserWithEmailAndPassword, signInWithRedirect, getRedirectResult, signInWithPopup } from 'firebase/auth';
 import { auth, provider } from '../../firebase/config';
 import { Link, useNavigate } from "react-router-dom";
-import { useEffect } from 'react';
-
-const API_URL = import.meta.env.VITE_backend_URL;
 
 const saveToBackend = async (user) => {
   try {
     const token = await user.getIdToken();
-    await axios.post(`${API_URL}/api/user/save`, {}, {
+    await axiosInstance.post('/api/user/save', {}, {
       headers: {
         Authorization: `Bearer ${token}`
       }

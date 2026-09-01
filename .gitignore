@@ -119,3 +119,11 @@ dist
 
 # End of https://mrkandreev.name/snippets/gitignore-generator/#Node
 frontend/testFetch.js
+
+# Local Vitest test files and artifacts (Ignored for GitHub)
+*.test.js
+*.spec.js
+tests/
+__tests__/
+.vitest/
+
