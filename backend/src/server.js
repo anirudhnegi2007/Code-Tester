@@ -31,6 +31,9 @@ const isOriginAllowed = (origin) => {
   if (staticAllowlist.includes(cleaned)) return true;
   // Allow all Vercel deployment preview URLs & Render origins
   if (cleaned.endsWith(".vercel.app") || cleaned.endsWith(".onrender.com")) return true;
+  // Allow all local network / private IP origins (e.g. http://192.168.x.x:5173, http://10.x.x.x:5173, etc.)
+  const isLanOrigin = /^https?:\/\/(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+)(:\d+)?$/i;
+  if (isLanOrigin.test(cleaned)) return true;
   return false;
 };
 
